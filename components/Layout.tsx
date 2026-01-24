@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Users, Swords, Map, Menu, X, Ghost, LogOut, Medal, Drama, Zap, Settings } from 'lucide-react';
+import { LayoutDashboard, Users, Swords, Map, Menu, X, Ghost, LogOut, Medal, Drama, Zap } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
 interface LayoutProps {
@@ -113,10 +113,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             </div>
 
             <div className="p-4 border-t border-white/5 space-y-2">
-                <button className="flex items-center gap-3 w-full px-3 py-2 text-sm text-slate-400 hover:text-white transition-colors">
-                    <Settings size={16} />
-                    <span>Settings</span>
-                </button>
                 <button 
                     onClick={handleLogout}
                     className="flex items-center gap-3 w-full px-3 py-2 text-sm text-red-400 hover:bg-red-900/20 rounded-lg transition-colors"
