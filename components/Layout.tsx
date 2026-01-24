@@ -57,17 +57,17 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const profileImage = user?.profileIcon || `https://picsum.photos/seed/${user?.uid || 'default'}/50/50`;
 
   return (
-    <div className={`min-h-screen font-sans transition-colors duration-300 relative overflow-hidden
+    <div className={`min-h-screen font-sans transition-colors duration-500 relative overflow-hidden selection:bg-[#4e6c8e]/30 selection:text-[#4e6c8e]
       ${isDarkMode ? 'bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-800'}
     `}>
-      {/* Ambient Background Blobs */}
+      {/* Refined Ambient Background */}
       <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
-        <div className={`absolute -top-[20%] -left-[10%] w-[70vw] h-[70vw] rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse transition-colors duration-1000
-           ${isDarkMode ? 'bg-indigo-900/40' : 'bg-blue-300/40'}`}></div>
-        <div className={`absolute top-[10%] -right-[10%] w-[60vw] h-[60vw] rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse transition-colors duration-1000 delay-1000
-           ${isDarkMode ? 'bg-purple-900/40' : 'bg-purple-300/40'}`}></div>
-         <div className={`absolute -bottom-[20%] left-[20%] w-[50vw] h-[50vw] rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse transition-colors duration-1000 delay-2000
-           ${isDarkMode ? 'bg-teal-900/40' : 'bg-teal-300/40'}`}></div>
+        <div className={`absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] rounded-full mix-blend-multiply filter blur-[120px] opacity-20 animate-pulse transition-colors duration-1000
+           ${isDarkMode ? 'bg-indigo-600' : 'bg-blue-200'}`}></div>
+        <div className={`absolute top-[20%] right-[-10%] w-[40vw] h-[40vw] rounded-full mix-blend-multiply filter blur-[100px] opacity-20 animate-pulse transition-colors duration-1000 delay-1000
+           ${isDarkMode ? 'bg-purple-600' : 'bg-purple-200'}`}></div>
+         <div className={`absolute bottom-[-10%] left-[20%] w-[40vw] h-[40vw] rounded-full mix-blend-multiply filter blur-[100px] opacity-20 animate-pulse transition-colors duration-1000 delay-2000
+           ${isDarkMode ? 'bg-emerald-600' : 'bg-emerald-200'}`}></div>
       </div>
 
       {/* Mobile Header */}
@@ -95,35 +95,35 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       <div className="flex relative z-10 h-screen overflow-hidden">
         {/* Sidebar */}
         <aside className={`
-            fixed inset-y-0 left-0 z-40 w-64 transform transition-transform duration-300 ease-in-out
+            fixed inset-y-0 left-0 z-40 w-72 transform transition-transform duration-300 ease-in-out
             lg:translate-x-0 lg:static lg:block
             ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}
-            bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl border-r border-white/40 dark:border-white/5 shadow-xl lg:shadow-none
+            bg-white/40 dark:bg-slate-900/40 backdrop-blur-2xl border-r border-white/50 dark:border-white/5 shadow-2xl lg:shadow-none
             flex flex-col
         `}>
-            <div className="p-6 hidden lg:flex items-center gap-3 border-b border-slate-200/50 dark:border-slate-700/50">
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#4e6c8e] to-[#2c3e50] flex items-center justify-center text-white shadow-lg">
-                <Ghost size={18} />
+            <div className="p-8 hidden lg:flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#4e6c8e] to-[#2c3e50] flex items-center justify-center text-white shadow-lg shadow-blue-900/20">
+                    <Ghost size={20} />
                 </div>
-                <h1 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-slate-800 to-slate-600 dark:from-slate-100 dark:to-slate-400">
+                <h1 className="text-xl font-black bg-clip-text text-transparent bg-gradient-to-r from-slate-800 to-slate-500 dark:from-slate-100 dark:to-slate-400">
                     Traveller's Diary
                 </h1>
             </div>
 
-            <div className="flex-1 overflow-y-auto py-4">
-                <div className="px-4 mb-2 text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
-                Menu
+            <div className="flex-1 overflow-y-auto py-2 px-4 space-y-1 scrollbar-hide">
+                <div className="px-4 mb-3 mt-2 text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
+                    Main Menu
                 </div>
-                <nav className="space-y-1 px-2">
+                <nav className="space-y-1.5">
                     {navItems.map((item) => (
                     <NavLink
                         key={item.path}
                         to={item.path}
                         className={({ isActive }) => `
-                        flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300
+                        flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all duration-200
                         ${isActive 
-                            ? 'bg-[#4e6c8e]/10 dark:bg-[#4e6c8e]/30 text-[#4e6c8e] dark:text-[#9bbddf] font-medium shadow-sm backdrop-blur-sm' 
-                            : 'text-slate-500 dark:text-slate-400 hover:bg-white/50 dark:hover:bg-slate-800/50 hover:text-slate-700 dark:hover:text-slate-200'}
+                            ? 'bg-white dark:bg-slate-800 text-[#4e6c8e] dark:text-[#9bbddf] font-bold shadow-sm ring-1 ring-slate-200/50 dark:ring-white/5' 
+                            : 'text-slate-500 dark:text-slate-400 hover:bg-white/50 dark:hover:bg-slate-800/50 hover:text-slate-900 dark:hover:text-slate-200 font-medium'}
                         `}
                     >
                         {item.icon}
@@ -133,32 +133,32 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 </nav>
             </div>
 
-            <div className="p-4 border-t border-slate-200/50 dark:border-slate-700/50 space-y-3">
-                <div className="flex justify-between items-center px-1">
-                     <span className="text-xs font-medium text-slate-400">Appearance</span>
+            <div className="p-4 border-t border-slate-200/50 dark:border-white/5 space-y-3 bg-white/30 dark:bg-slate-900/30">
+                <div className="flex justify-between items-center px-2">
+                     <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Mode</span>
                      <button 
                         onClick={toggleTheme}
-                        className="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-[#4e6c8e] transition-colors"
+                        className="p-1.5 rounded-lg bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-[#4e6c8e] dark:hover:text-white transition-colors shadow-sm ring-1 ring-slate-200/50 dark:ring-white/5"
                      >
-                        {isDarkMode ? <Sun size={16} /> : <Moon size={16} />}
+                        {isDarkMode ? <Sun size={14} /> : <Moon size={14} />}
                      </button>
                 </div>
                 
                 {user && (
-                  <div className="bg-white/50 dark:bg-slate-800/50 backdrop-blur-md rounded-xl p-3 flex items-center gap-3 border border-white/40 dark:border-white/5 shadow-sm">
+                  <div className="bg-white/60 dark:bg-slate-800/60 backdrop-blur-md rounded-2xl p-3 flex items-center gap-3 border border-white/50 dark:border-white/5 shadow-sm">
                       <img 
                         src={profileImage} 
                         alt="User" 
-                        className="w-10 h-10 rounded-full border border-slate-200 dark:border-slate-600 object-cover" 
+                        className="w-10 h-10 rounded-full border-2 border-white dark:border-slate-700 shadow-sm object-cover" 
                         referrerPolicy="no-referrer"
                       />
                       <div className="flex-1 min-w-0">
-                          <p className="text-sm font-semibold text-slate-800 dark:text-slate-200 truncate">{user.nickname}</p>
-                          <p className="text-xs text-slate-500 dark:text-slate-400">{user.server} • AR {user.level}</p>
+                          <p className="text-sm font-bold text-slate-800 dark:text-slate-200 truncate">{user.nickname}</p>
+                          <p className="text-[10px] text-slate-500 dark:text-slate-400 font-medium">{user.server} • AR {user.level}</p>
                       </div>
                       <button 
                         onClick={handleLogout}
-                        className="p-1.5 text-slate-400 hover:text-red-500 transition-colors"
+                        className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all"
                         title="Logout"
                       >
                         <LogOut size={16} />
@@ -170,8 +170,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
         {/* Main Content */}
         <main className="flex-1 pt-16 lg:pt-0 min-w-0 overflow-hidden relative">
-            <div className="h-full overflow-y-auto p-4 lg:p-8 scroll-smooth">
-                <div className="max-w-6xl mx-auto">
+            <div className="h-full overflow-y-auto p-4 lg:p-10 scroll-smooth">
+                <div className="max-w-7xl mx-auto">
                     {children}
                 </div>
             </div>
@@ -181,7 +181,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       {/* Mobile Overlay */}
       {isMobileMenuOpen && (
         <div 
-          className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-30 lg:hidden"
+          className="fixed inset-0 bg-slate-900/20 backdrop-blur-sm z-30 lg:hidden"
           onClick={() => setIsMobileMenuOpen(false)}
         />
       )}
