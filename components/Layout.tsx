@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Users, Swords, Map, Menu, X, Ghost, Moon, Sun, LogOut, Medal, Drama } from 'lucide-react';
+import { LayoutDashboard, Users, Swords, Map, Menu, X, Ghost, Moon, Sun, LogOut, Medal, Drama, Zap } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
 interface LayoutProps {
@@ -49,6 +49,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     { path: '/characters', label: 'Characters', icon: <Users size={20} /> },
     { path: '/abyss', label: 'Spiral Abyss', icon: <Swords size={20} /> },
     { path: '/theater', label: 'Theater', icon: <Drama size={20} /> },
+    { path: '/onslaught', label: 'Onslaught', icon: <Zap size={20} /> },
     { path: '/exploration', label: 'Exploration', icon: <Map size={20} /> },
     { path: '/achievements', label: 'Achievements', icon: <Medal size={20} /> },
   ];

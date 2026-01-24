@@ -276,7 +276,7 @@ export interface SpiralAbyssData {
   floors: AbyssFloor[];
 }
 
-// --- Hard Challenge (Imaginarium Theater) Types ---
+// --- Hard Challenge (Onslaught) Types ---
 
 export interface HardChallengeAvatar {
     avatar_id: number;
@@ -296,11 +296,19 @@ export interface HardChallengeMonster {
     monster_id: number;
 }
 
+export interface HardChallengeBestAvatar {
+    avatar_id: number;
+    side_icon: string;
+    dps: string;
+    type: number;
+}
+
 export interface HardChallengeStage {
     name: string;
     second: number;
     teams: HardChallengeAvatar[];
     monster: HardChallengeMonster;
+    best_avatar?: HardChallengeBestAvatar[];
 }
 
 export interface HardChallengeBest {
@@ -340,6 +348,56 @@ export interface HardChallengeData {
     };
     single: {
         has_data: boolean;
-        // ... structure if exists
+    };
+}
+
+// --- Role Combat (Imaginarium Theater) Types ---
+
+export interface RoleCombatStat {
+    difficulty_id: number;
+    max_round_id: number;
+    heraldry: number;
+    get_medal_round_list: number[];
+    medal_num: number;
+    coin_num: number;
+    avatar_bonus_num: number;
+    rent_avatar_num: number;
+    support_avatar_num: number;
+}
+
+export interface RoleCombatRound {
+    round_id: number;
+    is_get_medal: boolean;
+    boss_id: number;
+    boss_icon: string;
+    boss_level: number;
+    finish_time: number; // seconds
+    avatars: {
+        avatar_id: number;
+        avatar_type: number; // 1: Trial, 2: Own, 3: Support
+        name: string;
+        element: ElementType;
+        image: string;
+        level: number;
+        rarity: number;
+    }[];
+    enemies: {
+        name: string;
+        icon: string;
+        level: number;
+    }[];
+}
+
+export interface RoleCombatData {
+    has_data: boolean;
+    is_unlock: boolean;
+    schedule: {
+        schedule_id: number;
+        start_time: string;
+        end_time: string;
+    };
+    stat: RoleCombatStat;
+    detail: {
+        rounds: RoleCombatRound[];
     };
 }

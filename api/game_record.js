@@ -77,6 +77,12 @@ export default async function handler(request, response) {
       }
       url = `https://ho-yo-lab-api-interface.vercel.app/api/hard_challenge?server=${encodeURIComponent(server)}&role_id=${encodeURIComponent(role_id)}&ltuid_v2=${encodeURIComponent(ltuid_v2)}&ltoken_v2=${encodeURIComponent(ltoken_v2)}&need_detail=true`;
       options.method = 'GET';
+  } else if (endpoint === 'role_combat') {
+      if (!server || !role_id) {
+           return response.status(400).json({ retcode: -1, message: "Missing server or role_id for role_combat" });
+      }
+      url = `https://ho-yo-lab-api-interface.vercel.app/api/role_combat?server=${encodeURIComponent(server)}&role_id=${encodeURIComponent(role_id)}&ltuid_v2=${encodeURIComponent(ltuid_v2)}&ltoken_v2=${encodeURIComponent(ltoken_v2)}&need_detail=true`;
+      options.method = 'GET';
   } else if (endpoint === 'details') {
       if (!server || !role_id) {
            return response.status(400).json({ retcode: -1, message: "Missing server or role_id for details" });

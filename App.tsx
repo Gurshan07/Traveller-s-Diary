@@ -6,6 +6,7 @@ import Dashboard from './pages/Dashboard';
 import CharactersPage from './pages/CharactersPage';
 import AbyssPage from './pages/AbyssPage';
 import TheaterPage from './pages/TheaterPage';
+import OnslaughtPage from './pages/OnslaughtPage';
 import ExplorationPage from './pages/ExplorationPage';
 import RegionDetailPage from './pages/RegionDetailPage';
 import AchievementsPage from './pages/AchievementsPage';
@@ -64,6 +65,12 @@ const AppRoutes: React.FC = () => {
       <Route path="/theater" element={
         <ProtectedRoute>
           <TheaterPage data={null as any} />
+        </ProtectedRoute>
+      } />
+
+      <Route path="/onslaught" element={
+        <ProtectedRoute>
+          <OnslaughtPage data={null as any} />
         </ProtectedRoute>
       } />
       

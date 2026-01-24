@@ -1,51 +1,30 @@
-
-import { UserData, RegionData, Character, Stats, ElementType, WeaponType, Achievement, SpiralAbyssData, Home, CharacterDetailData, Property, HardChallengeData } from '../types';
+import { UserData, RegionData, Character, Stats, ElementType, WeaponType, Achievement, SpiralAbyssData, Home, CharacterDetailData, Property, HardChallengeData, RoleCombatData } from '../types';
 
 // Points to the Vercel Serverless Function defined in api/game_record.js
 const PROXY_PATH = '/api/game_record';
-const CACHE_PREFIX = 'genshin_char_detail_';
-const CACHE_EXPIRY_MS = 24 * 60 * 60 * 1000; // 24 hours
 
 export interface AuthCredentials {
   ltuid: string;
   ltoken: string;
 }
 
+const CACHE_PREFIX = 'genshin_char_detail_';
+const CACHE_EXPIRY_MS = 24 * 60 * 60 * 1000; // 24 hours
+
+// Helper to format server name from ID
 const formatServerName = (server: string): string => {
-    const map: Record<string, string> = {
-        'os_asia': 'Asia',
-        'os_usa': 'America',
-        'os_euro': 'Europe',
-        'os_cht': 'TW, HK, MO'
-    };
-    return map[server] || server;
-};
-
-// ... Helper mappings ...
-const getRegionElement = (regionName: string): ElementType => {
-  const map: Record<string, ElementType> = {
-    'Mondstadt': 'Anemo',
-    'Liyue': 'Geo',
-    'Inazuma': 'Electro',
-    'Sumeru': 'Dendro',
-    'Fontaine': 'Hydro',
-    'Natlan': 'Pyro',
-    'Dragonspine': 'Cryo',
-    'The Chasm': 'Geo',
-    'The Chasm: Underground Mines': 'Geo',
-    'Enkanomiya': 'Hydro',
-    'Chenyu Vale': 'Anemo',
-    'Sea of Bygone Eras': 'Hydro',
-    'Nod-Krai': 'Cryo' 
+  const map: Record<string, string> = {
+    'os_asia': 'Asia',
+    'os_usa': 'America',
+    'os_euro': 'Europe',
+    'os_cht': 'TW, HK, MO'
   };
-  if (map[regionName]) return map[regionName];
-  if (regionName.includes('Chasm')) return 'Geo';
-  if (regionName.includes('Chenyu')) return 'Anemo';
-  return 'Anemo'; 
+  return map[server] || server;
 };
 
-const getWeaponType = (typeId: number): WeaponType => {
-  switch (typeId) {
+// Helper to get weapon type from ID
+const getWeaponType = (type: number): WeaponType => {
+  switch (type) {
     case 1: return 'Sword';
     case 11: return 'Claymore';
     case 12: return 'Bow';
@@ -55,9 +34,29 @@ const getWeaponType = (typeId: number): WeaponType => {
   }
 };
 
-export const getStoredCredentials = (): AuthCredentials | null => {
+// Helper to infer element from region name
+const getRegionElement = (name: string): ElementType => {
+  if (name.includes('Mondstadt')) return 'Anemo';
+  if (name.includes('Liyue')) return 'Geo';
+  if (name.includes('Inazuma')) return 'Electro';
+  if (name.includes('Sumeru')) return 'Dendro';
+  if (name.includes('Fontaine')) return 'Hydro';
+  if (name.includes('Natlan')) return 'Pyro';
+  if (name.includes('Snezhnaya')) return 'Cryo';
+  return 'Anemo';
+};
+
+// Helper to get credentials from local storage
+const getStoredCredentials = (): AuthCredentials | null => {
   const stored = localStorage.getItem('genshin_tracker_credentials');
-  return stored ? JSON.parse(stored) : null;
+  if (stored) {
+    try {
+      return JSON.parse(stored);
+    } catch (e) {
+      return null;
+    }
+  }
+  return null;
 };
 
 export const authenticateAndFetchData = async (credentials: AuthCredentials): Promise<UserData> => {
@@ -171,7 +170,6 @@ export const authenticateAndFetchData = async (credentials: AuthCredentials): Pr
     }));
 
     // --- Bulk Fetch Detailed Character Info (to get Weapon/Artifacts correctly) ---
-    // The summary endpoint often lacks weapon details. We fetch the full details for all chars.
     if (characters.length > 0) {
         try {
             console.log('Frontend: Fetching bulk character details for weapon info...');
@@ -223,7 +221,6 @@ export const authenticateAndFetchData = async (credentials: AuthCredentials): Pr
             }
         } catch (e) {
             console.warn("Failed to fetch bulk character details", e);
-            // Continue with summary data if bulk fetch fails
         }
     }
 
@@ -270,7 +267,6 @@ export const authenticateAndFetchData = async (credentials: AuthCredentials): Pr
     return {
       nickname: (data.role && data.role.nickname) || nickname,
       uid: uid,
-      // Store the formatted name in the user data
       server: displayServer, 
       level: (data.role && data.role.level) || level,
       profileIcon: (data.role && data.role.game_head_icon) || "",
@@ -299,7 +295,6 @@ export const fetchAchievements = async (user: UserData): Promise<Achievement[]> 
     throw new Error("No credentials found. Please log in again.");
   }
   
-  // Need to reverse map server name back to technical ID if we stored the pretty one
   const serverMap: Record<string, string> = {
       'Asia': 'os_asia',
       'America': 'os_usa',
@@ -394,10 +389,42 @@ export const fetchHardChallenges = async (user: UserData): Promise<HardChallenge
   const json = await response.json();
 
   if (json.retcode !== 0) {
-    throw new Error(json.message || "Failed to fetch hard challenge data");
+    throw new Error(json.message || "Failed to fetch onslaught data");
   }
 
   return json.data?.data || [];
+};
+
+export const fetchRoleCombat = async (user: UserData): Promise<RoleCombatData[]> => {
+    const credentials = getStoredCredentials();
+    if (!credentials) {
+      throw new Error("No credentials found. Please log in again.");
+    }
+  
+    const serverMap: Record<string, string> = {
+        'Asia': 'os_asia',
+        'America': 'os_usa',
+        'Europe': 'os_euro',
+        'TW, HK, MO': 'os_cht'
+    };
+    const technicalServer = serverMap[user.server] || user.server;
+  
+    const queryParams = new URLSearchParams({
+      ltuid_v2: credentials.ltuid,
+      ltoken_v2: credentials.ltoken,
+      endpoint: 'role_combat',
+      server: technicalServer,
+      role_id: user.uid
+    });
+  
+    const response = await fetch(`${PROXY_PATH}?${queryParams.toString()}`, { method: 'GET' });
+    const json = await response.json();
+  
+    if (json.retcode !== 0) {
+      throw new Error(json.message || "Failed to fetch theater data");
+    }
+  
+    return json.data?.data || [];
 };
 
 export const fetchCharacterDetail = async (user: UserData, characterId: string): Promise<CharacterDetailData> => {
@@ -464,31 +491,22 @@ export const fetchCharacterDetail = async (user: UserData, characterId: string):
 
     // Helper to find property by ID in the various property lists
     const findProp = (id: number): Property => {
-        // Properties are scattered in different arrays in the raw response
-        // selected_properties = Final Values (green + white combined)
-        // base_properties = Base Values (white)
-        // extra_properties = Some additionals
-        // element_properties = Elemental DMG bonuses
-
         const selected = (charData.selected_properties || []).find((p: any) => p.property_type == id);
         const base = (charData.base_properties || []).find((p: any) => p.property_type == id);
         
         return {
             property_type: id,
             base: base?.final || base?.value || "",
-            add: selected?.add || "", // Use selected.add directly from JSON
+            add: selected?.add || "", 
             final: selected?.final || selected?.value || "0"
         };
     };
 
     // Helper to extract element dmg bonus which might be under different IDs
     const findElemProp = () => {
-        // Elemental DMG IDs range roughly 40-46, Phys is 30.
-        // We look for the highest value one among elemental types
         const elems = (charData.selected_properties || []).filter((p: any) => 
             (p.property_type >= 40 && p.property_type <= 46) || p.property_type === 30
         );
-        // Find the one with > 0 value or return the first/default
         const active = elems.find((p: any) => parseFloat(p.final) > 0) || elems[0];
         
         if (!active) return { property_type: 0, base: "0", add: "0", final: "0.0%" };
@@ -553,7 +571,7 @@ export const fetchCharacterDetail = async (user: UserData, characterId: string):
             sub_property_list: (r.sub_property_list || []).map((sub: any) => ({
                 display_name: getPropName(sub.property_type),
                 display_value: sub.display_value || sub.value,
-                times: sub.times || 0 // Parse roll counts
+                times: sub.times || 0 
             }))
         })),
         constellations: (charData.constellations || []).map((c: any) => ({
@@ -573,30 +591,28 @@ export const fetchCharacterDetail = async (user: UserData, characterId: string):
             skill_affix_list: s.skill_affix_list || []
         })),
         properties: {
-             hp: findProp(2000), // Max HP
-             atk: findProp(2001), // ATK
-             def: findProp(2002), // DEF
-             em: findProp(28),    // Elemental Mastery
-             er: findProp(23),    // Energy Recharge
-             cr: findProp(20),    // Crit Rate
-             cd: findProp(22),    // Crit DMG
-             phys: findProp(30),  // Physical DMG (Generic)
-             elem: findElemProp(), // Dynamic Elemental DMG
-             heal: findProp(26),   // Healing Bonus
-             inHeal: findProp(27), // Incoming Healing
+             hp: findProp(2000), 
+             atk: findProp(2001), 
+             def: findProp(2002), 
+             em: findProp(28),    
+             er: findProp(23),    
+             cr: findProp(20),    
+             cd: findProp(22),    
+             phys: findProp(30),  
+             elem: findElemProp(), 
+             heal: findProp(26),   
+             inHeal: findProp(27), 
              cooldown: findProp(80),
              shield: findProp(81)
         }
     };
 
-    // Save to Cache
     try {
         localStorage.setItem(cacheKey, JSON.stringify({
             timestamp: Date.now(),
             data: mapped
         }));
     } catch(e) {
-        // Handle storage quota exceeded
         console.warn('Failed to cache character detail', e);
     }
 
