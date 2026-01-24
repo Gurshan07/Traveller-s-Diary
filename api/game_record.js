@@ -71,6 +71,12 @@ export default async function handler(request, response) {
       const schedule_type = request.query.schedule_type || '1'; 
       url = `https://ho-yo-lab-api-interface.vercel.app/api/spiral_abyss?server=${encodeURIComponent(server)}&role_id=${encodeURIComponent(role_id)}&schedule_type=${schedule_type}&ltuid_v2=${encodeURIComponent(ltuid_v2)}&ltoken_v2=${encodeURIComponent(ltoken_v2)}`;
       options.method = 'GET';
+  } else if (endpoint === 'hard_challenge') {
+      if (!server || !role_id) {
+           return response.status(400).json({ retcode: -1, message: "Missing server or role_id for hard_challenge" });
+      }
+      url = `https://ho-yo-lab-api-interface.vercel.app/api/hard_challenge?server=${encodeURIComponent(server)}&role_id=${encodeURIComponent(role_id)}&ltuid_v2=${encodeURIComponent(ltuid_v2)}&ltoken_v2=${encodeURIComponent(ltoken_v2)}&need_detail=true`;
+      options.method = 'GET';
   } else if (endpoint === 'details') {
       if (!server || !role_id) {
            return response.status(400).json({ retcode: -1, message: "Missing server or role_id for details" });

@@ -1,5 +1,5 @@
 
-import { UserData, RegionData, Character, Stats, ElementType, WeaponType, Achievement, SpiralAbyssData, Home, CharacterDetailData, Property } from '../types';
+import { UserData, RegionData, Character, Stats, ElementType, WeaponType, Achievement, SpiralAbyssData, Home, CharacterDetailData, Property, HardChallengeData } from '../types';
 
 // Points to the Vercel Serverless Function defined in api/game_record.js
 const PROXY_PATH = '/api/game_record';
@@ -366,6 +366,38 @@ export const fetchSpiralAbyss = async (user: UserData, scheduleType: number = 1)
   }
 
   return json.data;
+};
+
+export const fetchHardChallenges = async (user: UserData): Promise<HardChallengeData[]> => {
+  const credentials = getStoredCredentials();
+  if (!credentials) {
+    throw new Error("No credentials found. Please log in again.");
+  }
+
+  const serverMap: Record<string, string> = {
+      'Asia': 'os_asia',
+      'America': 'os_usa',
+      'Europe': 'os_euro',
+      'TW, HK, MO': 'os_cht'
+  };
+  const technicalServer = serverMap[user.server] || user.server;
+
+  const queryParams = new URLSearchParams({
+    ltuid_v2: credentials.ltuid,
+    ltoken_v2: credentials.ltoken,
+    endpoint: 'hard_challenge',
+    server: technicalServer,
+    role_id: user.uid
+  });
+
+  const response = await fetch(`${PROXY_PATH}?${queryParams.toString()}`, { method: 'GET' });
+  const json = await response.json();
+
+  if (json.retcode !== 0) {
+    throw new Error(json.message || "Failed to fetch hard challenge data");
+  }
+
+  return json.data?.data || [];
 };
 
 export const fetchCharacterDetail = async (user: UserData, characterId: string): Promise<CharacterDetailData> => {

@@ -275,3 +275,71 @@ export interface SpiralAbyssData {
   energy_skill_rank: AbyssRankItem[];
   floors: AbyssFloor[];
 }
+
+// --- Hard Challenge (Imaginarium Theater) Types ---
+
+export interface HardChallengeAvatar {
+    avatar_id: number;
+    name: string;
+    element: ElementType;
+    image: string;
+    level: number;
+    rarity: number;
+    rank?: number;
+}
+
+export interface HardChallengeMonster {
+    name: string;
+    level: number;
+    icon: string;
+    desc: string[];
+    monster_id: number;
+}
+
+export interface HardChallengeStage {
+    name: string;
+    second: number;
+    teams: HardChallengeAvatar[];
+    monster: HardChallengeMonster;
+}
+
+export interface HardChallengeBest {
+    difficulty: number;
+    second: number;
+    icon: string;
+}
+
+export interface HardChallengeData {
+    schedule: {
+        schedule_id: string;
+        start_time: string;
+        end_time: string;
+        name: string;
+        is_valid: boolean;
+        start_date_time: {
+            year: number;
+            month: number;
+            day: number;
+            hour: number;
+            minute: number;
+            second: number;
+        };
+        end_date_time: {
+             year: number;
+            month: number;
+            day: number;
+            hour: number;
+            minute: number;
+            second: number;
+        };
+    };
+    mp: {
+        best: HardChallengeBest;
+        challenge: HardChallengeStage[];
+        has_data: boolean;
+    };
+    single: {
+        has_data: boolean;
+        // ... structure if exists
+    };
+}
