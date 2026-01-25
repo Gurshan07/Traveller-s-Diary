@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { UserData, RoleCombatData, HardChallengeData } from '../types';
 import { fetchRoleCombat, fetchHardChallenges } from '../services/api';
 import { getAccountInsights } from '../services/putter';
-import { HelpCircle, ChevronRight, Swords, Drama, Zap, Clock, Trophy, Award, Sparkles, Bot } from 'lucide-react';
+import { HelpCircle, ChevronRight, Swords, Drama, Zap, Clock, Trophy, Award, Sparkles, Bot, Download } from 'lucide-react';
 
 interface DashboardProps {
   data: UserData;
@@ -84,6 +84,19 @@ const Dashboard: React.FC<DashboardProps> = ({ data }) => {
     }
   };
 
+  const handleDownloadData = () => {
+      const dataStr = JSON.stringify(data, null, 2);
+      const blob = new Blob([dataStr], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `genshin_data_${data.uid}_${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+  };
+
   // Calculations for Summary Panel
   const theaterLabel = theater?.has_data ? `Act ${theater.stat.max_round_id}` : 'No Data';
   const onslaughtLabel = onslaught?.mp?.has_data ? `Score ${onslaught.mp.best.difficulty}` : 'Not Started';
@@ -101,8 +114,18 @@ const Dashboard: React.FC<DashboardProps> = ({ data }) => {
                    <h2 className="text-slate-200 font-bold text-sm uppercase tracking-widest">Summary</h2>
                    <HelpCircle size={14} className="text-slate-600 cursor-help hover:text-slate-400" />
                </div>
-               <div className="text-[10px] text-slate-500 font-mono">
-                   UID: {data.uid}
+               <div className="flex items-center gap-3">
+                   <div className="text-[10px] text-slate-500 font-mono">
+                       UID: {data.uid}
+                   </div>
+                   <button 
+                     onClick={handleDownloadData}
+                     className="flex items-center gap-1.5 px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/5 rounded text-[10px] text-slate-400 hover:text-white transition-colors"
+                     title="Save data to file"
+                   >
+                     <Download size={12} />
+                     <span>JSON</span>
+                   </button>
                </div>
            </div>
 
@@ -221,7 +244,12 @@ const Dashboard: React.FC<DashboardProps> = ({ data }) => {
                    <div className="w-full">
                        <div className="flex gap-4">
                            <div className="shrink-0 w-12 h-12 rounded-full bg-slate-800 border border-white/10 overflow-hidden">
-                               <img src="https://act-webstatic.hoyoverse.com/hk4e/e20200928calculate/item_icon/8a2e1654/b0b7454f7a26490696a1a67301297d26.png" alt="Paimon" className="w-full h-full object-cover scale-110" referrerPolicy="no-referrer" />
+                               <img 
+                                 src="https://upload-os-bbs.hoyolab.com/upload/2024/02/20/10904121/6b7617511c1d072f95438848417c800c_7185074244583196884.png" 
+                                 alt="Paimon" 
+                                 className="w-full h-full object-cover scale-110" 
+                                 referrerPolicy="no-referrer" 
+                               />
                            </div>
                            <div className="flex-1 bg-white/5 rounded-2xl rounded-tl-none p-4 border border-white/5 text-slate-300 text-sm leading-relaxed relative">
                                <p className="whitespace-pre-wrap">{aiInsight}</p>
