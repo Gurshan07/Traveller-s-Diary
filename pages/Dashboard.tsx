@@ -354,8 +354,14 @@ const Dashboard: React.FC<DashboardProps> = ({ data }) => {
                            <p className="whitespace-pre-wrap">{msg.text}</p>
                        </div>
                        {msg.role === 'user' && (
-                           <div className="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center shrink-0 mt-1">
-                               <User size={16} className="text-slate-400" />
+                           <div className="w-8 h-8 rounded-full bg-slate-700 border border-white/10 overflow-hidden shrink-0 mt-1 shadow-sm">
+                               {data.profileIcon ? (
+                                   <img src={data.profileIcon} alt="Traveler" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                               ) : (
+                                   <div className="w-full h-full flex items-center justify-center">
+                                       <User size={16} className="text-slate-400" />
+                                   </div>
+                               )}
                            </div>
                        )}
                    </div>
