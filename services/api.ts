@@ -34,14 +34,29 @@ const getWeaponType = (type: number): WeaponType => {
   }
 };
 
+// Helper to normalize element names (e.g. Ice -> Cryo)
+const normalizeElement = (el: string): ElementType => {
+    if (!el) return 'Anemo';
+    const lower = el.toLowerCase();
+    // English/API variations
+    if (lower === 'ice' || lower === 'cryo') return 'Cryo';
+    if (lower === 'fire' || lower === 'pyro') return 'Pyro';
+    if (lower === 'water' || lower === 'hydro') return 'Hydro';
+    if (lower === 'electric' || lower === 'electro') return 'Electro';
+    if (lower === 'grass' || lower === 'dendro') return 'Dendro';
+    if (lower === 'wind' || lower === 'anemo') return 'Anemo';
+    if (lower === 'rock' || lower === 'geo') return 'Geo';
+    return 'Anemo'; // Default fallback
+};
+
 // Helper to infer element from region name
 const getRegionElement = (name: string): ElementType => {
   if (name.includes('Mondstadt')) return 'Anemo';
-  if (name.includes('Liyue')) return 'Geo';
+  if (name.includes('Liyue') || name.includes('Chenyu')) return 'Geo';
   if (name.includes('Inazuma')) return 'Electro';
   if (name.includes('Sumeru')) return 'Dendro';
-  if (name.includes('Fontaine')) return 'Hydro';
-  if (name.includes('Natlan')) return 'Pyro';
+  if (name.includes('Fontaine') || name.includes('Nostoi')) return 'Hydro';
+  if (name.includes('Natlan') || name.includes('Nod')) return 'Pyro';
   if (name.includes('Snezhnaya')) return 'Cryo';
   return 'Anemo';
 };
@@ -150,7 +165,7 @@ export const authenticateAndFetchData = async (credentials: AuthCredentials): Pr
     let characters: Character[] = (data.avatars || []).map((char: any) => ({
       id: char.id.toString(),
       name: char.name,
-      element: char.element as ElementType,
+      element: normalizeElement(char.element),
       rarity: char.rarity > 5 ? 5 : char.rarity as 4 | 5,
       level: char.level,
       friendship: char.fetter,
@@ -524,7 +539,7 @@ export const fetchCharacterDetail = async (user: UserData, characterId: string):
         base: {
             id: charData.base.id,
             name: charData.base.name,
-            element: charData.base.element,
+            element: normalizeElement(charData.base.element),
             rarity: charData.base.rarity,
             level: charData.base.level,
             fetter: charData.base.fetter,

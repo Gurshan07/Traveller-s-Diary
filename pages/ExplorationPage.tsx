@@ -1,14 +1,16 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { UserData, RegionData } from '../types';
-import { ELEMENT_ICONS, BG_GRADIENTS, ELEMENT_COLORS } from '../constants';
-import { Crown, Sprout, Landmark } from 'lucide-react';
+import { BG_GRADIENTS } from '../constants';
+import { Crown, Sprout, Landmark, Map } from 'lucide-react';
 
 interface ExplorationPageProps {
   data: UserData;
 }
 
 const RegionCard: React.FC<{ region: RegionData; adjustedPercentage?: number }> = ({ region, adjustedPercentage }) => {
+    const [imageError, setImageError] = useState(false);
+
     // Use the adjusted percentage if provided (for parent regions with 0%), otherwise match the API
     const displayPercentage = adjustedPercentage !== undefined ? adjustedPercentage : region.exploration_progress;
     
@@ -20,20 +22,27 @@ const RegionCard: React.FC<{ region: RegionData; adjustedPercentage?: number }> 
             <div className="bg-white/70 dark:bg-slate-800/60 backdrop-blur-lg rounded-2xl shadow-sm border border-white/50 dark:border-white/10 overflow-hidden hover:shadow-xl dark:hover:shadow-slate-900/50 transition-all duration-300 transform hover:-translate-y-1 h-full flex flex-col">
                 {/* Header Image */}
                 <div className="h-40 relative bg-slate-200 dark:bg-slate-800 overflow-hidden">
-                    <div className={`absolute inset-0 bg-gradient-to-r ${BG_GRADIENTS[region.element]} mix-blend-multiply dark:mix-blend-overlay opacity-60`}></div>
-                    <img 
-                        src={region.image} 
-                        alt={region.name} 
-                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
-                        referrerPolicy="no-referrer"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/30 to-transparent"></div>
+                    <div className={`absolute inset-0 bg-gradient-to-r ${BG_GRADIENTS[region.element] || 'from-slate-900 to-transparent'} mix-blend-multiply dark:mix-blend-overlay opacity-60 z-10`}></div>
                     
-                    <div className="absolute bottom-0 left-0 p-5 w-full">
+                    {!imageError && region.image ? (
+                        <img 
+                            src={region.image} 
+                            alt={region.name} 
+                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
+                            referrerPolicy="no-referrer"
+                            onError={() => setImageError(true)}
+                        />
+                    ) : (
+                        <div className="w-full h-full flex items-center justify-center bg-slate-900/50">
+                            <Map className="text-white/10 w-24 h-24" />
+                        </div>
+                    )}
+
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/30 to-transparent z-10"></div>
+                    
+                    <div className="absolute bottom-0 left-0 p-5 w-full z-20">
                         <div className="flex items-center gap-3">
-                            <div className={`p-2 rounded-full ${ELEMENT_COLORS[region.element]} bg-white/10 backdrop-blur-md border border-white/20 shadow-lg`}>
-                                {ELEMENT_ICONS[region.element]}
-                            </div>
+                            {/* Element icon removed as per request */}
                             <h3 className="text-2xl font-bold text-white tracking-wide drop-shadow-md truncate pr-4">{region.name}</h3>
                         </div>
                     </div>
