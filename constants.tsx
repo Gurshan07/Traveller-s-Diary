@@ -1,6 +1,7 @@
+
 import React from 'react';
 import { ElementType, WeaponType } from './types';
-import { Flame, Droplets, Wind, Zap, Leaf, Snowflake, Mountain, Sword, Shield, Disc, Crosshair, Sparkles } from 'lucide-react';
+import { Sword, Shield, Disc, Crosshair, Sparkles } from 'lucide-react';
 
 export const ELEMENT_COLORS: Record<ElementType, string> = {
   Pyro: 'text-red-600 dark:text-red-400 bg-red-100/50 dark:bg-red-900/30 border-red-200/60 dark:border-red-700/50',
@@ -13,13 +14,13 @@ export const ELEMENT_COLORS: Record<ElementType, string> = {
 };
 
 export const ELEMENT_ICONS: Record<ElementType, React.ReactNode> = {
-  Pyro: <Flame className="w-4 h-4" />,
-  Hydro: <Droplets className="w-4 h-4" />,
-  Anemo: <Wind className="w-4 h-4" />,
-  Electro: <Zap className="w-4 h-4" />,
-  Dendro: <Leaf className="w-4 h-4" />,
-  Cryo: <Snowflake className="w-4 h-4" />,
-  Geo: <Mountain className="w-4 h-4" />,
+  Pyro: <img src="https://enka.network/ui/UI_Buff_Element_Fire.png" alt="Pyro" className="w-full h-full object-contain drop-shadow-[0_0_5px_rgba(255,100,100,0.6)]" referrerPolicy="no-referrer" />,
+  Hydro: <img src="https://enka.network/ui/UI_Buff_Element_Water.png" alt="Hydro" className="w-full h-full object-contain drop-shadow-[0_0_5px_rgba(100,100,255,0.6)]" referrerPolicy="no-referrer" />,
+  Anemo: <img src="https://enka.network/ui/UI_Buff_Element_Wind.png" alt="Anemo" className="w-full h-full object-contain drop-shadow-[0_0_5px_rgba(100,255,150,0.6)]" referrerPolicy="no-referrer" />,
+  Electro: <img src="https://enka.network/ui/UI_Buff_Element_Electric.png" alt="Electro" className="w-full h-full object-contain drop-shadow-[0_0_5px_rgba(200,100,255,0.6)]" referrerPolicy="no-referrer" />,
+  Dendro: <img src="https://enka.network/ui/UI_Buff_Element_Grass.png" alt="Dendro" className="w-full h-full object-contain drop-shadow-[0_0_5px_rgba(100,255,50,0.6)]" referrerPolicy="no-referrer" />,
+  Cryo: <img src="https://enka.network/ui/UI_Buff_Element_Ice.png" alt="Cryo" className="w-full h-full object-contain drop-shadow-[0_0_5px_rgba(100,255,255,0.6)]" referrerPolicy="no-referrer" />,
+  Geo: <img src="https://enka.network/ui/UI_Buff_Element_Rock.png" alt="Geo" className="w-full h-full object-contain drop-shadow-[0_0_5px_rgba(255,200,50,0.6)]" referrerPolicy="no-referrer" />,
 };
 
 export const WEAPON_ICONS: Record<WeaponType, React.ReactNode> = {
@@ -31,11 +32,11 @@ export const WEAPON_ICONS: Record<WeaponType, React.ReactNode> = {
 };
 
 export const BG_GRADIENTS: Record<ElementType, string> = {
-    Pyro: 'from-red-500/20 to-transparent',
-    Hydro: 'from-blue-500/20 to-transparent',
-    Anemo: 'from-teal-500/20 to-transparent',
-    Electro: 'from-purple-500/20 to-transparent',
-    Dendro: 'from-green-500/20 to-transparent',
-    Cryo: 'from-cyan-500/20 to-transparent',
-    Geo: 'from-yellow-500/20 to-transparent',
+    Pyro: 'from-red-950/80 to-transparent',
+    Hydro: 'from-blue-950/80 to-transparent',
+    Anemo: 'from-teal-950/80 to-transparent',
+    Electro: 'from-purple-950/80 to-transparent',
+    Dendro: 'from-green-950/80 to-transparent',
+    Cryo: 'from-cyan-950/80 to-transparent',
+    Geo: 'from-yellow-950/80 to-transparent',
 };
