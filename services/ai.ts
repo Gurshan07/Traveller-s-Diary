@@ -8,6 +8,10 @@ interface Message {
 
 let history: Message[] = [];
 
+export const resetChatHistory = () => {
+    history = [];
+};
+
 const simplifyData = (data: UserData) => {
     return {
         player: {
@@ -71,7 +75,7 @@ export const sendMessageToPaimon = async (message: string): Promise<string> => {
           text = response;
       } else if (typeof response === 'object' && response !== null) {
           // @ts-ignore
-          text = response.message?.content || response.content || "Paimon is confused.";
+          text = response.message?.content || response.content || JSON.stringify(response.message || response);
       } else {
           text = "Paimon is speechless!";
       }

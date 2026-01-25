@@ -12,6 +12,7 @@ import RegionDetailPage from './pages/RegionDetailPage';
 import AchievementsPage from './pages/AchievementsPage';
 import LoginPage from './pages/LoginPage';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { ChatProvider } from './contexts/ChatContext';
 
 // Protected Route Component
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -100,9 +101,11 @@ const AppRoutes: React.FC = () => {
 const App: React.FC = () => {
   return (
     <AuthProvider>
-      <HashRouter>
-        <AppRoutes />
-      </HashRouter>
+      <ChatProvider>
+        <HashRouter>
+          <AppRoutes />
+        </HashRouter>
+      </ChatProvider>
     </AuthProvider>
   );
 };

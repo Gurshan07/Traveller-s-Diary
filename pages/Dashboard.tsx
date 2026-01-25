@@ -3,8 +3,9 @@ import React, { useEffect, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { UserData, RoleCombatData, HardChallengeData } from '../types';
 import { fetchRoleCombat, fetchHardChallenges } from '../services/api';
-import { initializeChat, sendMessageToPaimon } from '../services/ai';
+import { initializeChat, sendMessageToPaimon, resetChatHistory } from '../services/ai';
 import { HelpCircle, Swords, Drama, Zap, Clock, Download, Sparkles, Send, Bot, User, LogIn, Lock, LogOut } from 'lucide-react';
+import { useChat } from '../contexts/ChatContext';
 
 interface DashboardProps {
   data: UserData;
@@ -54,12 +55,24 @@ const Dashboard: React.FC<DashboardProps> = ({ data }) => {
   const [theater, setTheater] = useState<RoleCombatData | null>(null);
   const [onslaught, setOnslaught] = useState<HardChallengeData | null>(null);
   
-  // Chat State
-  const [messages, setMessages] = useState<{role: 'user' | 'model', text: string}[]>([]);
+  // Consuming Chat Context
+  const { 
+    messages, 
+    addMessage, 
+    setMessages, 
+    loadingAi, 
+    setLoadingAi, 
+    isPuterAuthenticated, 
+    setIsPuterAuthenticated,
+    chatUid,
+    setChatUid,
+    clearChat
+  } = useChat();
+
   const [input, setInput] = useState('');
-  const [loadingAi, setLoadingAi] = useState(false);
-  const [chatInitialized, setChatInitialized] = useState(false);
-  const [isPuterAuthenticated, setIsPuterAuthenticated] = useState(false);
+  // chatInitialized logic is now inferred from chatUid matching data.uid
+  const chatInitialized = chatUid === data?.uid;
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -79,35 +92,41 @@ const Dashboard: React.FC<DashboardProps> = ({ data }) => {
   }, [data]);
 
   useEffect(() => {
+      // Check Puter auth on mount if not already done
       const checkPuterAuth = () => {
           const puter = (window as any).puter;
           if (puter?.auth?.isSignedIn()) {
               setIsPuterAuthenticated(true);
           }
       };
-      checkPuterAuth();
+      if (!isPuterAuthenticated) {
+          checkPuterAuth();
+      }
   }, []);
 
   useEffect(() => {
-      // Initialize Paimon Chat ONLY when data is present
+      // Initialize Paimon Chat ONLY if data changed (new user) or never initialized
       const init = async () => {
           if (!data) return;
           
+          // If we are already initialized for this UID and have history, skip re-init
+          if (chatUid === data.uid) return;
+
           try {
-              // We initialize local history regardless of auth, so it's ready once they sign in
+              // New user or first load
+              resetChatHistory();
               await initializeChat(data);
-              setChatInitialized(true);
               
-              if (messages.length === 0) {
-                 setMessages([{ role: 'model', text: "Paimon is ready! What should we check first? Characters? Exploration?" }]);
-              }
+              clearChat(); // Clear UI messages from potential previous user
+              addMessage({ role: 'model', text: "Paimon is ready! What should we check first? Characters? Exploration?" });
+              setChatUid(data.uid);
           } catch (e) {
               console.error("Failed to init chat", e);
-              setMessages([{ role: 'model', text: "Paimon is having trouble connecting... (AI Init Failed)" }]);
+              addMessage({ role: 'model', text: "Paimon is having trouble connecting... (AI Init Failed)" });
           }
       };
       init();
-  }, [data]);
+  }, [data, chatUid]);
 
   useEffect(() => {
       messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -122,7 +141,8 @@ const Dashboard: React.FC<DashboardProps> = ({ data }) => {
           // Re-affirm chat init
           if (data) {
               await initializeChat(data);
-              setMessages(prev => [...prev, { role: 'model', text: "Paimon is connected to the Irminsul! I can see your adventure data now!" }]);
+              // Don't clear history here, just append confirmation
+              addMessage({ role: 'model', text: "Paimon is connected to the Irminsul! I can see your adventure data now!" });
           }
       } catch (e) {
           console.error("Login failed", e);
@@ -139,10 +159,14 @@ const Dashboard: React.FC<DashboardProps> = ({ data }) => {
           // Trigger sign in again
           await puter.auth.signIn();
           setIsPuterAuthenticated(true);
-          // Re-affirm chat init
+          
+          // Re-init for new account context
           if (data) {
+              resetChatHistory();
+              clearChat();
               await initializeChat(data);
-              setMessages([{ role: 'model', text: "Paimon is ready with the new account!" }]);
+              addMessage({ role: 'model', text: "Paimon is ready with the new account!" });
+              setChatUid(data.uid); // Ensure UID sync
           }
       } catch (e) {
           console.error("Switch account failed", e);
@@ -154,15 +178,15 @@ const Dashboard: React.FC<DashboardProps> = ({ data }) => {
       if (!input.trim() || !chatInitialized || loadingAi || !isPuterAuthenticated) return;
 
       const userMsg = input.trim();
-      setMessages(prev => [...prev, { role: 'user', text: userMsg }]);
+      addMessage({ role: 'user', text: userMsg });
       setInput('');
       setLoadingAi(true);
 
       try {
           const response = await sendMessageToPaimon(userMsg);
-          setMessages(prev => [...prev, { role: 'model', text: response }]);
+          addMessage({ role: 'model', text: response });
       } catch (err) {
-          setMessages(prev => [...prev, { role: 'model', text: "Sorry, Paimon got confused." }]);
+          addMessage({ role: 'model', text: "Sorry, Paimon got confused." });
       } finally {
           setLoadingAi(false);
       }
