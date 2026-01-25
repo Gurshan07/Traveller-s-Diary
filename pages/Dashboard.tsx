@@ -3,7 +3,8 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { UserData, RoleCombatData, HardChallengeData } from '../types';
 import { fetchRoleCombat, fetchHardChallenges } from '../services/api';
-import { HelpCircle, ChevronRight, Swords, Drama, Zap, Clock, Trophy, Award } from 'lucide-react';
+import { getAccountInsights } from '../services/putter';
+import { HelpCircle, ChevronRight, Swords, Drama, Zap, Clock, Trophy, Award, Sparkles, Bot } from 'lucide-react';
 
 interface DashboardProps {
   data: UserData;
@@ -52,6 +53,8 @@ const BattleRecordWidget: React.FC<{
 const Dashboard: React.FC<DashboardProps> = ({ data }) => {
   const [theater, setTheater] = useState<RoleCombatData | null>(null);
   const [onslaught, setOnslaught] = useState<HardChallengeData | null>(null);
+  const [aiInsight, setAiInsight] = useState<string | null>(null);
+  const [loadingAi, setLoadingAi] = useState(false);
 
   useEffect(() => {
      const fetchData = async () => {
@@ -68,6 +71,18 @@ const Dashboard: React.FC<DashboardProps> = ({ data }) => {
      };
      fetchData();
   }, [data]);
+
+  const handleGenerateInsight = async () => {
+    setLoadingAi(true);
+    try {
+        const text = await getAccountInsights(data);
+        setAiInsight(text);
+    } catch (e) {
+        setAiInsight("Paimon couldn't connect to the server!");
+    } finally {
+        setLoadingAi(false);
+    }
+  };
 
   // Calculations for Summary Panel
   const theaterLabel = theater?.has_data ? `Act ${theater.stat.max_round_id}` : 'No Data';
@@ -170,6 +185,53 @@ const Dashboard: React.FC<DashboardProps> = ({ data }) => {
                />
           </div>
       </div>
+
+      {/* 3. AI Insights Widget */}
+      <div className="bg-[#131720] rounded-xl border border-white/5 overflow-hidden">
+          <div className="p-4 border-b border-white/5 flex justify-between items-center bg-[#181d29]">
+               <div className="flex items-center gap-2">
+                   <div className="w-1.5 h-1.5 bg-[#d3bc8e] rotate-45"></div>
+                   <h2 className="text-slate-300 font-bold text-sm uppercase tracking-wide flex items-center gap-2">
+                       <Sparkles size={14} className="text-purple-400" />
+                       Paimon's Insights
+                   </h2>
+               </div>
+          </div>
+          <div className="p-6 min-h-[120px] flex items-center justify-center">
+               {!aiInsight && !loadingAi && (
+                   <button 
+                       onClick={handleGenerateInsight}
+                       className="group flex items-center gap-3 px-6 py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full transition-all"
+                   >
+                       <Bot size={20} className="text-[#d3bc8e] group-hover:rotate-12 transition-transform" />
+                       <span className="text-slate-300 group-hover:text-white text-sm font-bold">Ask Paimon to Analyze Account</span>
+                   </button>
+               )}
+               
+               {loadingAi && (
+                   <div className="flex flex-col items-center gap-3">
+                       <div className="animate-spin text-[#d3bc8e]">
+                           <Sparkles size={24} />
+                       </div>
+                       <p className="text-xs text-slate-500 animate-pulse">Paimon is thinking...</p>
+                   </div>
+               )}
+
+               {aiInsight && (
+                   <div className="w-full">
+                       <div className="flex gap-4">
+                           <div className="shrink-0 w-12 h-12 rounded-full bg-slate-800 border border-white/10 overflow-hidden">
+                               <img src="https://act-webstatic.hoyoverse.com/hk4e/e20200928calculate/item_icon/8a2e1654/b0b7454f7a26490696a1a67301297d26.png" alt="Paimon" className="w-full h-full object-cover scale-110" referrerPolicy="no-referrer" />
+                           </div>
+                           <div className="flex-1 bg-white/5 rounded-2xl rounded-tl-none p-4 border border-white/5 text-slate-300 text-sm leading-relaxed relative">
+                               <p className="whitespace-pre-wrap">{aiInsight}</p>
+                           </div>
+                       </div>
+                   </div>
+               )}
+          </div>
+      </div>
+
     </div>
   );
 };
