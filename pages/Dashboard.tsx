@@ -366,7 +366,17 @@ const Dashboard: React.FC<DashboardProps> = ({ data }) => {
                    <div key={idx} className={`flex gap-3 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                        {msg.role === 'model' || msg.role === 'assistant' ? (
                            <div className="w-8 h-8 rounded-full bg-slate-800 border border-white/10 overflow-hidden shrink-0 mt-1 shadow-sm">
-                               <img src="/assets/paimon.png" alt="Paimon" className="w-full h-full object-cover scale-110" referrerPolicy="no-referrer" />
+                               <img 
+                                    src="/assets/paimon.png" 
+                                    alt="Paimon" 
+                                    className="w-full h-full object-cover scale-110" 
+                                    referrerPolicy="no-referrer"
+                                    onError={(e) => {
+                                        const target = e.target as HTMLImageElement;
+                                        target.onerror = null; 
+                                        target.src = "https://fastcdn.hoyoverse.com/content/v1/5b0d8726e6d34e2c8e312891316b9318_1573641249.png";
+                                    }} 
+                                />
                            </div>
                        ) : null}
                        <div className={`max-w-[80%] rounded-2xl p-3 text-sm leading-relaxed shadow-sm ${
