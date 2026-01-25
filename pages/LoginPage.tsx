@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
@@ -24,7 +25,7 @@ const LoginPage: React.FC = () => {
        {/* Background Ambience */}
        <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
           <div className="absolute top-[-10%] right-[-5%] w-[500px] h-[500px] bg-blue-500/20 rounded-full blur-[100px] animate-pulse"></div>
-          <div className="absolute bottom-[-10%] left-[-10%] w-[600px] h-[600px] bg-purple-500/20 rounded-full blur-[100px] animate-pulse delay-1000"></div>
+          <div className="absolute bottom-[-10%] left-[-10%] w-[600px] h-[600px] bg-purple-500/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
        </div>
 
        <div className="w-full max-w-md relative z-10">
@@ -36,9 +37,9 @@ const LoginPage: React.FC = () => {
              <p className="text-slate-500 dark:text-slate-400">Sync your HoYoLab data securely</p>
           </div>
 
-          <div className="bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl rounded-3xl p-8 shadow-2xl border border-white/50 dark:border-white/10">
-              <form onSubmit={handleSubmit} className="space-y-6">
-                 
+          <div className="bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl rounded-3xl p-8 shadow-2xl border border-white/50 dark:border-white/10 transition-all duration-500">
+              
+              <form onSubmit={handleSubmit} className="space-y-6 animate-in fade-in slide-in-from-bottom-4">
                  {error && (
                    <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-800 rounded-xl flex items-start gap-3 text-red-600 dark:text-red-300 text-sm">
                       <AlertCircle size={18} className="shrink-0 mt-0.5" />
@@ -116,10 +117,6 @@ const LoginPage: React.FC = () => {
                      <li>Type <code className="bg-slate-200 dark:bg-slate-800 px-1 py-0.5 rounded text-slate-700 dark:text-slate-300">document.cookie</code></li>
                      <li>Copy <code className="font-mono text-[#4e6c8e]">ltuid_v2</code> and <code className="font-mono text-[#4e6c8e]">ltoken_v2</code></li>
                   </ol>
-                  <p className="text-[10px] text-slate-400 mt-4 text-center">
-                    Cookies are sent securely to our backend for proxying requests. 
-                    They are stored encrypted in your session.
-                  </p>
               </div>
           </div>
        </div>

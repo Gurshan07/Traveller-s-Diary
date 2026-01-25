@@ -1,10 +1,10 @@
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { UserData, RoleCombatData, HardChallengeData } from '../types';
 import { fetchRoleCombat, fetchHardChallenges } from '../services/api';
-import { getAccountInsights } from '../services/putter';
-import { HelpCircle, ChevronRight, Swords, Drama, Zap, Clock, Trophy, Award, Sparkles, Bot, Download } from 'lucide-react';
+import { initializeChat, sendMessageToPaimon } from '../services/ai';
+import { HelpCircle, Swords, Drama, Zap, Clock, Download, Sparkles, Send, Bot, User } from 'lucide-react';
 
 interface DashboardProps {
   data: UserData;
@@ -53,8 +53,14 @@ const BattleRecordWidget: React.FC<{
 const Dashboard: React.FC<DashboardProps> = ({ data }) => {
   const [theater, setTheater] = useState<RoleCombatData | null>(null);
   const [onslaught, setOnslaught] = useState<HardChallengeData | null>(null);
-  const [aiInsight, setAiInsight] = useState<string | null>(null);
+  
+  // Chat State
+  const [messages, setMessages] = useState<{role: 'user' | 'model', text: string}[]>([]);
+  const [input, setInput] = useState('');
   const [loadingAi, setLoadingAi] = useState(false);
+  const [chatInitialized, setChatInitialized] = useState(false);
+  const [isAiEnabled, setIsAiEnabled] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
      const fetchData = async () => {
@@ -72,16 +78,71 @@ const Dashboard: React.FC<DashboardProps> = ({ data }) => {
      fetchData();
   }, [data]);
 
-  const handleGenerateInsight = async () => {
-    setLoadingAi(true);
-    try {
-        const text = await getAccountInsights(data);
-        setAiInsight(text);
-    } catch (e) {
-        setAiInsight("Paimon couldn't connect to the server!");
-    } finally {
-        setLoadingAi(false);
-    }
+  useEffect(() => {
+      // Check if API key is already selected
+      const checkKey = async () => {
+          const aistudio = (window as any).aistudio;
+          if (aistudio && await aistudio.hasSelectedApiKey()) {
+              setIsAiEnabled(true);
+          }
+      };
+      checkKey();
+  }, []);
+
+  useEffect(() => {
+      // Initialize Paimon Chat ONLY when data is present AND AI is enabled
+      const init = async () => {
+          if (!data || !isAiEnabled || chatInitialized) return;
+          
+          try {
+              await initializeChat(data);
+              setChatInitialized(true);
+              setMessages([{ role: 'model', text: "Paimon is ready! What should we check first? Characters? Exploration?" }]);
+          } catch (e) {
+              console.error("Failed to init chat", e);
+              setMessages([{ role: 'model', text: "Paimon is having trouble connecting... (AI Init Failed)" }]);
+          }
+      };
+      init();
+  }, [data, isAiEnabled, chatInitialized]);
+
+  useEffect(() => {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
+  const handleEnableAi = async () => {
+      const aistudio = (window as any).aistudio;
+      if (aistudio) {
+          try {
+              await aistudio.openSelectKey();
+              setIsAiEnabled(true);
+              // Trigger init happens via effect
+          } catch (e) { 
+              console.error(e); 
+              alert("Failed to select API key. Please try again.");
+          }
+      } else {
+          alert("Google AI Studio environment not detected.");
+      }
+  };
+
+  const handleSendMessage = async (e: React.FormEvent) => {
+      e.preventDefault();
+      if (!input.trim() || !chatInitialized || loadingAi) return;
+
+      const userMsg = input.trim();
+      setMessages(prev => [...prev, { role: 'user', text: userMsg }]);
+      setInput('');
+      setLoadingAi(true);
+
+      try {
+          const response = await sendMessageToPaimon(userMsg);
+          setMessages(prev => [...prev, { role: 'model', text: response }]);
+      } catch (err) {
+          setMessages(prev => [...prev, { role: 'model', text: "Sorry, Paimon got confused." }]);
+      } finally {
+          setLoadingAi(false);
+      }
   };
 
   const handleDownloadData = () => {
@@ -209,54 +270,95 @@ const Dashboard: React.FC<DashboardProps> = ({ data }) => {
           </div>
       </div>
 
-      {/* 3. AI Insights Widget */}
-      <div className="bg-[#131720] rounded-xl border border-white/5 overflow-hidden">
+      {/* 3. Paimon Chat Interface */}
+      <div className="bg-[#131720] rounded-xl border border-white/5 overflow-hidden flex flex-col h-[500px] relative shadow-lg">
           <div className="p-4 border-b border-white/5 flex justify-between items-center bg-[#181d29]">
                <div className="flex items-center gap-2">
-                   <div className="w-1.5 h-1.5 bg-[#d3bc8e] rotate-45"></div>
-                   <h2 className="text-slate-300 font-bold text-sm uppercase tracking-wide flex items-center gap-2">
-                       <Sparkles size={14} className="text-purple-400" />
-                       Paimon's Insights
-                   </h2>
+                   <Sparkles size={16} className="text-purple-400" />
+                   <h2 className="text-slate-200 font-bold text-sm uppercase tracking-wide">Chat with Paimon</h2>
                </div>
+               <div className="text-[10px] text-slate-500 bg-white/5 px-2 py-1 rounded">Powered by Gemini</div>
           </div>
-          <div className="p-6 min-h-[120px] flex items-center justify-center">
-               {!aiInsight && !loadingAi && (
-                   <button 
-                       onClick={handleGenerateInsight}
-                       className="group flex items-center gap-3 px-6 py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full transition-all"
-                   >
-                       <Bot size={20} className="text-[#d3bc8e] group-hover:rotate-12 transition-transform" />
-                       <span className="text-slate-300 group-hover:text-white text-sm font-bold">Ask Paimon to Analyze Account</span>
-                   </button>
-               )}
-               
-               {loadingAi && (
-                   <div className="flex flex-col items-center gap-3">
-                       <div className="animate-spin text-[#d3bc8e]">
-                           <Sparkles size={24} />
-                       </div>
-                       <p className="text-xs text-slate-500 animate-pulse">Paimon is thinking...</p>
-                   </div>
-               )}
+          
+          {!isAiEnabled ? (
+              <div className="absolute inset-0 top-[57px] bg-[#131720]/95 backdrop-blur-sm z-20 flex flex-col items-center justify-center p-6 text-center">
+                    <div className="w-20 h-20 rounded-full bg-gradient-to-br from-[#4e6c8e] to-[#2c3e50] flex items-center justify-center mb-6 animate-float shadow-2xl shadow-blue-500/20">
+                        <Sparkles size={32} className="text-white animate-pulse" />
+                    </div>
+                    <h3 className="text-2xl font-bold text-white mb-3">Wake Paimon Up!</h3>
+                    <p className="text-slate-400 mb-8 max-w-sm leading-relaxed">
+                        Connect your Google account to enable Paimon's AI capabilities. She can analyze your roster, plan upgrades, and chat about your journey!
+                    </p>
+                    <button 
+                        onClick={handleEnableAi}
+                        className="px-6 py-3.5 bg-white hover:bg-slate-100 text-slate-900 font-bold rounded-xl transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 active:translate-y-0 flex items-center gap-3"
+                    >
+                        <img src="https://www.gstatic.com/lamda/images/gemini_sparkle_v002_d4735304ff6292a690345.svg" className="w-5 h-5" alt="" />
+                        Enable with Gemini
+                    </button>
+                    <p className="mt-6 text-[10px] text-slate-600">
+                        Requires a valid API Key from Google AI Studio.
+                    </p>
+              </div>
+          ) : null}
 
-               {aiInsight && (
-                   <div className="w-full">
-                       <div className="flex gap-4">
-                           <div className="shrink-0 w-12 h-12 rounded-full bg-slate-800 border border-white/10 overflow-hidden">
-                               <img 
-                                 src="https://upload-os-bbs.hoyolab.com/upload/2024/02/20/10904121/6b7617511c1d072f95438848417c800c_7185074244583196884.png" 
-                                 alt="Paimon" 
-                                 className="w-full h-full object-cover scale-110" 
-                                 referrerPolicy="no-referrer" 
-                               />
+          <div className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-thin scrollbar-thumb-slate-700">
+               {messages.map((msg, idx) => (
+                   <div key={idx} className={`flex gap-3 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                       {msg.role === 'model' && (
+                           <div className="w-8 h-8 rounded-full bg-slate-800 border border-white/10 overflow-hidden shrink-0 mt-1 shadow-sm">
+                               <img src="https://upload-os-bbs.hoyolab.com/upload/2024/02/20/10904121/6b7617511c1d072f95438848417c800c_7185074244583196884.png" alt="Paimon" className="w-full h-full object-cover scale-110" referrerPolicy="no-referrer" />
                            </div>
-                           <div className="flex-1 bg-white/5 rounded-2xl rounded-tl-none p-4 border border-white/5 text-slate-300 text-sm leading-relaxed relative">
-                               <p className="whitespace-pre-wrap">{aiInsight}</p>
-                           </div>
+                       )}
+                       <div className={`max-w-[80%] rounded-2xl p-3 text-sm leading-relaxed shadow-sm ${
+                           msg.role === 'user' 
+                           ? 'bg-[#4e6c8e] text-white rounded-tr-none' 
+                           : 'bg-white/10 text-slate-200 rounded-tl-none border border-white/5'
+                       }`}>
+                           <p className="whitespace-pre-wrap">{msg.text}</p>
                        </div>
+                       {msg.role === 'user' && (
+                           <div className="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center shrink-0 mt-1">
+                               <User size={16} className="text-slate-400" />
+                           </div>
+                       )}
+                   </div>
+               ))}
+               {loadingAi && (
+                   <div className="flex gap-3">
+                        <div className="w-8 h-8 rounded-full bg-slate-800 border border-white/10 flex items-center justify-center shrink-0">
+                            <Bot size={16} className="text-slate-500" />
+                        </div>
+                        <div className="bg-white/5 rounded-2xl rounded-tl-none p-3 border border-white/5">
+                            <div className="flex gap-1">
+                                <div className="w-2 h-2 bg-slate-500 rounded-full animate-bounce"></div>
+                                <div className="w-2 h-2 bg-slate-500 rounded-full animate-bounce delay-100"></div>
+                                <div className="w-2 h-2 bg-slate-500 rounded-full animate-bounce delay-200"></div>
+                            </div>
+                        </div>
                    </div>
                )}
+               <div ref={messagesEndRef} />
+          </div>
+
+          <div className="p-4 bg-[#181d29] border-t border-white/5">
+               <form onSubmit={handleSendMessage} className="flex gap-2">
+                   <input 
+                       type="text" 
+                       value={input}
+                       onChange={(e) => setInput(e.target.value)}
+                       placeholder={isAiEnabled ? "Ask Paimon about your characters..." : "Paimon is sleeping..."}
+                       className="flex-1 bg-[#0c0f16] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-slate-200 focus:outline-none focus:ring-1 focus:ring-[#4e6c8e] transition-all disabled:opacity-50"
+                       disabled={loadingAi || !chatInitialized || !isAiEnabled}
+                   />
+                   <button 
+                       type="submit" 
+                       disabled={loadingAi || !chatInitialized || !input.trim() || !isAiEnabled}
+                       className="bg-[#4e6c8e] hover:bg-[#3d5a7a] text-white p-2.5 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
+                   >
+                       <Send size={18} />
+                   </button>
+               </form>
           </div>
       </div>
 
