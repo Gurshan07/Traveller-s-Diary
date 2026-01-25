@@ -1,5 +1,5 @@
 
-import { UserData } from "../types";
+import { UserData, SpiralAbyssData, RoleCombatData, HardChallengeData } from "../types";
 
 interface Message {
     role: "system" | "user" | "assistant";
@@ -12,18 +12,51 @@ export const resetChatHistory = () => {
     history = [];
 };
 
-const simplifyData = (data: UserData) => {
+const simplifyData = (
+    data: UserData, 
+    abyss?: SpiralAbyssData | null, 
+    theater?: RoleCombatData[] | null, 
+    onslaught?: HardChallengeData[] | null
+) => {
+    // Process Theater Data (Current Season)
+    const currentTheater = theater && theater.length > 0 ? theater[0] : null;
+    const theaterSummary = currentTheater ? {
+        season: currentTheater.schedule.schedule_id,
+        difficulty: currentTheater.stat.difficulty_id,
+        medals: currentTheater.stat.medal_num,
+        maxRound: currentTheater.stat.max_round_id
+    } : "No Data";
+
+    // Process Abyss Data (Detailed)
+    const abyssSummary = abyss ? {
+        floor: abyss.max_floor,
+        stars: abyss.total_star,
+        battles: abyss.total_battle_times,
+        damage_rank: abyss.damage_rank.slice(0, 1).map(r => `Avatar ID ${r.avatar_id}: ${r.value}`),
+        defeat_rank: abyss.defeat_rank.slice(0, 1).map(r => `Avatar ID ${r.avatar_id}: ${r.value}`)
+    } : { floor: data.abyss.floor, stars: data.abyss.stars };
+
+    // Process Onslaught
+    const currentOnslaught = onslaught && onslaught.length > 0 ? onslaught[0] : null;
+    const onslaughtSummary = currentOnslaught && currentOnslaught.mp && currentOnslaught.mp.has_data ? {
+        difficulty: currentOnslaught.mp.best.difficulty,
+        time: currentOnslaught.mp.best.second
+    } : "No Data";
+
     return {
         player: {
             name: data.nickname,
             ar: data.level,
             days: data.stats.active_days,
             achievements: data.stats.achievements,
-            abyss: data.abyss.floor
         },
-        // Increased limit to 45 to ensure main characters are included
-        // Shortened keys to keep token count efficient: n=name, w=weapon, a=artifacts, c=constellation
-        roster: (data.characters || []).slice(0, 45).map(c => ({
+        combat_records: {
+            spiral_abyss: abyssSummary,
+            imaginarium_theater: theaterSummary,
+            stygian_onslaught: onslaughtSummary
+        },
+        // Limit to top 50 to fit context, prioritizes built characters
+        roster: (data.characters || []).slice(0, 50).map(c => ({
             n: c.name,
             lvl: c.level,
             c: c.constellation,
@@ -34,21 +67,27 @@ const simplifyData = (data: UserData) => {
     };
 };
 
-export const initializeChat = async (userData: UserData) => {
-  const simpleData = simplifyData(userData);
+export const initializeChat = async (
+    userData: UserData,
+    abyssData?: SpiralAbyssData | null,
+    theaterData?: RoleCombatData[] | null,
+    onslaughtData?: HardChallengeData[] | null
+) => {
+  const simpleData = simplifyData(userData, abyssData, theaterData, onslaughtData);
   
   const systemInstruction = `
   You are Paimon, the Traveler's guide and companion in Genshin Impact.
   
   **CRITICAL DIRECTIVES:**
-  1. **USE THE DATA**: You have the user's ACTUAL account data below. **DO NOT GUESS.**
-     - If asked "How is my Zhongli?", CHECK the 'roster' list first.
+  1. **USE THE DATA**: You have the user's FULL account data below, including Abyss and Theater stats. **DO NOT GUESS.**
+     - If asked about "Abyss", refer to 'combat_records.spiral_abyss'.
+     - If asked about "Theater", refer to 'combat_records.imaginarium_theater'.
+     - If asked "How is my [Character]?", CHECK the 'roster' list first.
      - STATE what they are currently wearing (e.g., "Paimon sees you have Black Tassel equipped...").
-     - If the character is not in the 'roster' list, say you can't find them in their top characters.
   2. **PERSONA**: Speak in third-person ("Paimon thinks...", "Paimon suggests..."). Be cheery, slightly sassy, and concise.
-  3. **BREVITY**: Keep responses **SHORT** (max 3-4 sentences). NO long bullet lists. Write like a chat message, not a wiki guide.
+  3. **BREVITY**: Keep responses **SHORT** (max 3-4 sentences). NO long bullet lists. Write like a chat message.
   
-  **ACCOUNT DATA:**
+  **FULL ACCOUNT DATA:**
   ${JSON.stringify(simpleData)}
   `;
 
@@ -66,7 +105,6 @@ export const sendMessageToPaimon = async (message: string): Promise<string> => {
 
   try {
       // Puter AI chat call
-      // We pass the entire history array so the model remembers previous turns AND the system data
       const response = await puter.ai.chat(history);
       
       // Handle response parsing

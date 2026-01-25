@@ -1,10 +1,10 @@
 
 import React, { useEffect, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { UserData, RoleCombatData, HardChallengeData } from '../types';
-import { fetchRoleCombat, fetchHardChallenges } from '../services/api';
+import { UserData, RoleCombatData, HardChallengeData, SpiralAbyssData } from '../types';
+import { fetchRoleCombat, fetchHardChallenges, fetchSpiralAbyss } from '../services/api';
 import { initializeChat, sendMessageToPaimon, resetChatHistory } from '../services/ai';
-import { HelpCircle, Swords, Drama, Zap, Clock, Download, Sparkles, Send, Bot, User, LogIn, Lock, LogOut } from 'lucide-react';
+import { HelpCircle, Swords, Drama, Zap, Clock, Download, Sparkles, Send, Bot, User, LogIn, Lock, LogOut, Loader2 } from 'lucide-react';
 import { useChat } from '../contexts/ChatContext';
 
 interface DashboardProps {
@@ -55,6 +55,9 @@ const Dashboard: React.FC<DashboardProps> = ({ data }) => {
   const [theater, setTheater] = useState<RoleCombatData | null>(null);
   const [onslaught, setOnslaught] = useState<HardChallengeData | null>(null);
   
+  // New state to track if we are actively gathering background data for the AI
+  const [isAiLoadingContext, setIsAiLoadingContext] = useState(false);
+
   // Consuming Chat Context
   const { 
     messages, 
@@ -70,26 +73,57 @@ const Dashboard: React.FC<DashboardProps> = ({ data }) => {
   } = useChat();
 
   const [input, setInput] = useState('');
-  // chatInitialized logic is now inferred from chatUid matching data.uid
-  const chatInitialized = chatUid === data?.uid;
+  // chatInitialized logic is now inferred from chatUid matching data.uid AND context loading being done
+  const chatInitialized = chatUid === data?.uid && !isAiLoadingContext;
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  // Master Data Fetcher for Dashboard + AI
   useEffect(() => {
-     const fetchData = async () => {
+     const fetchAllData = async () => {
+        if (!data) return;
+
+        // If we already have the chat ready for this user, just fetch display data quietly
+        // If not, we block chat until ready
+        const needsAiInit = chatUid !== data.uid;
+        if (needsAiInit) {
+            setIsAiLoadingContext(true);
+            resetChatHistory();
+            clearChat();
+        }
+
         try {
-            const [tData, oData] = await Promise.all([
-                fetchRoleCombat(data).catch(() => []),
-                fetchHardChallenges(data).catch(() => [])
+            // Fetch everything in parallel
+            const [tData, oData, aData] = await Promise.all([
+                fetchRoleCombat(data).catch(e => { console.warn("Theater fetch fail", e); return []; }),
+                fetchHardChallenges(data).catch(e => { console.warn("Onslaught fetch fail", e); return []; }),
+                fetchSpiralAbyss(data).catch(e => { console.warn("Abyss fetch fail", e); return null; })
             ]);
+
+            // Update Dashboard State
             if (tData.length > 0) setTheater(tData[0]);
             if (oData.length > 0) setOnslaught(oData[0]);
+
+            // Initialize AI with FULL Context if needed
+            if (needsAiInit) {
+                await initializeChat(data, aData, tData, oData);
+                addMessage({ role: 'model', text: "Paimon has finished reading your travel diary! I know about your Abyss runs and Theater stats now! What should we discuss?" });
+                setChatUid(data.uid);
+                setIsAiLoadingContext(false);
+            }
         } catch (e) {
             console.error("Error fetching dashboard extra data", e);
+            if (needsAiInit) {
+                 addMessage({ role: 'model', text: "Paimon had trouble reading some pages of your diary... but I'm still here!" });
+                 setChatUid(data.uid); // Allow chatting anyway even if partial fail
+                 setIsAiLoadingContext(false);
+            }
         }
      };
-     fetchData();
-  }, [data]);
+     
+     // Trigger the fetch
+     fetchAllData();
+  }, [data, chatUid]); // Depend on chatUid so switching accounts triggers this
 
   useEffect(() => {
       // Check Puter auth on mount if not already done
@@ -105,30 +139,6 @@ const Dashboard: React.FC<DashboardProps> = ({ data }) => {
   }, []);
 
   useEffect(() => {
-      // Initialize Paimon Chat ONLY if data changed (new user) or never initialized
-      const init = async () => {
-          if (!data) return;
-          
-          // If we are already initialized for this UID and have history, skip re-init
-          if (chatUid === data.uid) return;
-
-          try {
-              // New user or first load
-              resetChatHistory();
-              await initializeChat(data);
-              
-              clearChat(); // Clear UI messages from potential previous user
-              addMessage({ role: 'model', text: "Paimon is ready! What should we check first? Characters? Exploration?" });
-              setChatUid(data.uid);
-          } catch (e) {
-              console.error("Failed to init chat", e);
-              addMessage({ role: 'model', text: "Paimon is having trouble connecting... (AI Init Failed)" });
-          }
-      };
-      init();
-  }, [data, chatUid]);
-
-  useEffect(() => {
       messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
@@ -138,12 +148,8 @@ const Dashboard: React.FC<DashboardProps> = ({ data }) => {
       try {
           await puter.auth.signIn();
           setIsPuterAuthenticated(true);
-          // Re-affirm chat init
-          if (data) {
-              await initializeChat(data);
-              // Don't clear history here, just append confirmation
-              addMessage({ role: 'model', text: "Paimon is connected to the Irminsul! I can see your adventure data now!" });
-          }
+          // Just trigger a re-render/re-check effectively
+          setChatUid(null); // Force re-init
       } catch (e) {
           console.error("Login failed", e);
       }
@@ -160,14 +166,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data }) => {
           await puter.auth.signIn();
           setIsPuterAuthenticated(true);
           
-          // Re-init for new account context
-          if (data) {
-              resetChatHistory();
-              clearChat();
-              await initializeChat(data);
-              addMessage({ role: 'model', text: "Paimon is ready with the new account!" });
-              setChatUid(data.uid); // Ensure UID sync
-          }
+          setChatUid(null); // Force re-init sequence
       } catch (e) {
           console.error("Switch account failed", e);
       }
@@ -367,7 +366,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data }) => {
                    <div key={idx} className={`flex gap-3 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                        {msg.role === 'model' || msg.role === 'assistant' ? (
                            <div className="w-8 h-8 rounded-full bg-slate-800 border border-white/10 overflow-hidden shrink-0 mt-1 shadow-sm">
-                               <img src="https://upload-os-bbs.hoyolab.com/upload/2024/02/20/10904121/6b7617511c1d072f95438848417c800c_7185074244583196884.png" alt="Paimon" className="w-full h-full object-cover scale-110" referrerPolicy="no-referrer" />
+                               <img src="https://fastcdn.hoyoverse.com/content/v1/5b0d8726e6d34e2c8e312891316b9318_1573641249.png" alt="Paimon" className="w-full h-full object-cover scale-110" referrerPolicy="no-referrer" />
                            </div>
                        ) : null}
                        <div className={`max-w-[80%] rounded-2xl p-3 text-sm leading-relaxed shadow-sm ${
@@ -390,6 +389,20 @@ const Dashboard: React.FC<DashboardProps> = ({ data }) => {
                        )}
                    </div>
                ))}
+               
+               {/* Context Loading State */}
+               {isAiLoadingContext && (
+                   <div className="flex gap-3 items-center opacity-75">
+                        <div className="w-8 h-8 rounded-full bg-slate-800 border border-white/10 flex items-center justify-center shrink-0">
+                             <Bot size={16} className="text-slate-500" />
+                        </div>
+                        <div className="text-xs text-slate-400 italic flex items-center gap-2">
+                             <Loader2 size={12} className="animate-spin" />
+                             Paimon is reading your adventure diary (gathering battle records)...
+                        </div>
+                   </div>
+               )}
+
                {loadingAi && (
                    <div className="flex gap-3">
                         <div className="w-8 h-8 rounded-full bg-slate-800 border border-white/10 flex items-center justify-center shrink-0">
@@ -413,7 +426,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data }) => {
                        type="text" 
                        value={input}
                        onChange={(e) => setInput(e.target.value)}
-                       placeholder={isPuterAuthenticated ? "Ask Paimon about your characters..." : "Please sign in to chat..."}
+                       placeholder={!chatInitialized ? "Paimon is getting ready..." : "Ask Paimon about your characters..."}
                        className="flex-1 bg-[#0c0f16] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-slate-200 focus:outline-none focus:ring-1 focus:ring-[#4e6c8e] transition-all disabled:opacity-50"
                        disabled={loadingAi || !chatInitialized || !isPuterAuthenticated}
                    />
