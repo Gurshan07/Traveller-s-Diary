@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { UserData, RoleCombatData, HardChallengeData } from '../types';
 import { fetchRoleCombat, fetchHardChallenges } from '../services/api';
 import { initializeChat, sendMessageToPaimon } from '../services/ai';
-import { HelpCircle, Swords, Drama, Zap, Clock, Download, Sparkles, Send, Bot, User } from 'lucide-react';
+import { HelpCircle, Swords, Drama, Zap, Clock, Download, Sparkles, Send, Bot, User, LogIn, Lock } from 'lucide-react';
 
 interface DashboardProps {
   data: UserData;
@@ -59,6 +59,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data }) => {
   const [input, setInput] = useState('');
   const [loadingAi, setLoadingAi] = useState(false);
   const [chatInitialized, setChatInitialized] = useState(false);
+  const [isPuterAuthenticated, setIsPuterAuthenticated] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -78,29 +79,59 @@ const Dashboard: React.FC<DashboardProps> = ({ data }) => {
   }, [data]);
 
   useEffect(() => {
+      const checkPuterAuth = () => {
+          const puter = (window as any).puter;
+          if (puter?.auth?.isSignedIn()) {
+              setIsPuterAuthenticated(true);
+          }
+      };
+      checkPuterAuth();
+  }, []);
+
+  useEffect(() => {
       // Initialize Paimon Chat ONLY when data is present
       const init = async () => {
-          if (!data || chatInitialized) return;
+          if (!data) return;
           
           try {
+              // We initialize local history regardless of auth, so it's ready once they sign in
               await initializeChat(data);
               setChatInitialized(true);
-              setMessages([{ role: 'model', text: "Paimon is ready! What should we check first? Characters? Exploration?" }]);
+              
+              if (messages.length === 0) {
+                 setMessages([{ role: 'model', text: "Paimon is ready! What should we check first? Characters? Exploration?" }]);
+              }
           } catch (e) {
               console.error("Failed to init chat", e);
               setMessages([{ role: 'model', text: "Paimon is having trouble connecting... (AI Init Failed)" }]);
           }
       };
       init();
-  }, [data, chatInitialized]);
+  }, [data]);
 
   useEffect(() => {
       messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
+  const handlePuterLogin = async () => {
+      const puter = (window as any).puter;
+      if (!puter) return;
+      try {
+          await puter.auth.signIn();
+          setIsPuterAuthenticated(true);
+          // Re-affirm chat init
+          if (data) {
+              await initializeChat(data);
+              setMessages(prev => [...prev, { role: 'model', text: "Paimon is now connected to the Irminsul (Logged In)! I know everything about your adventure now!" }]);
+          }
+      } catch (e) {
+          console.error("Login failed", e);
+      }
+  };
+
   const handleSendMessage = async (e: React.FormEvent) => {
       e.preventDefault();
-      if (!input.trim() || !chatInitialized || loadingAi) return;
+      if (!input.trim() || !chatInitialized || loadingAi || !isPuterAuthenticated) return;
 
       const userMsg = input.trim();
       setMessages(prev => [...prev, { role: 'user', text: userMsg }]);
@@ -249,10 +280,36 @@ const Dashboard: React.FC<DashboardProps> = ({ data }) => {
                    <Sparkles size={16} className="text-purple-400" />
                    <h2 className="text-slate-200 font-bold text-sm uppercase tracking-wide">Chat with Paimon</h2>
                </div>
-               <div className="text-[10px] text-slate-500 bg-white/5 px-2 py-1 rounded">Powered by Puter</div>
+               <div className="flex items-center gap-2">
+                   {isPuterAuthenticated ? (
+                       <span className="flex items-center gap-1 text-[10px] text-green-400 bg-green-900/20 px-2 py-0.5 rounded border border-green-800/50">
+                           <Lock size={8} /> Secure
+                       </span>
+                   ) : null}
+                   <div className="text-[10px] text-slate-500 bg-white/5 px-2 py-1 rounded">Powered by Puter</div>
+               </div>
           </div>
           
-          <div className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-thin scrollbar-thumb-slate-700">
+          <div className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-thin scrollbar-thumb-slate-700 relative">
+               {!isPuterAuthenticated && (
+                   <div className="absolute inset-0 z-20 bg-[#131720]/80 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center animate-in fade-in duration-300">
+                        <div className="w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center mb-4 shadow-xl shadow-purple-500/20">
+                            <Bot size={32} className="text-white" />
+                        </div>
+                        <h3 className="text-xl font-bold text-white mb-2">Connect Paimon's Brain</h3>
+                        <p className="text-slate-400 text-sm mb-6 max-w-xs">
+                            Log in with your Google or Puter account to enable AI analysis of your Genshin data.
+                        </p>
+                        <button 
+                            onClick={handlePuterLogin}
+                            className="flex items-center gap-2 bg-white text-slate-900 hover:bg-slate-200 px-6 py-3 rounded-xl font-bold transition-colors shadow-lg"
+                        >
+                            <LogIn size={18} />
+                            Sign in to Enable AI
+                        </button>
+                   </div>
+               )}
+
                {messages.map((msg, idx) => (
                    <div key={idx} className={`flex gap-3 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                        {msg.role === 'model' || msg.role === 'assistant' ? (
@@ -297,13 +354,13 @@ const Dashboard: React.FC<DashboardProps> = ({ data }) => {
                        type="text" 
                        value={input}
                        onChange={(e) => setInput(e.target.value)}
-                       placeholder="Ask Paimon about your characters..."
+                       placeholder={isPuterAuthenticated ? "Ask Paimon about your characters..." : "Please sign in to chat..."}
                        className="flex-1 bg-[#0c0f16] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-slate-200 focus:outline-none focus:ring-1 focus:ring-[#4e6c8e] transition-all disabled:opacity-50"
-                       disabled={loadingAi || !chatInitialized}
+                       disabled={loadingAi || !chatInitialized || !isPuterAuthenticated}
                    />
                    <button 
                        type="submit" 
-                       disabled={loadingAi || !chatInitialized || !input.trim()}
+                       disabled={loadingAi || !chatInitialized || !input.trim() || !isPuterAuthenticated}
                        className="bg-[#4e6c8e] hover:bg-[#3d5a7a] text-white p-2.5 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
                    >
                        <Send size={18} />
