@@ -2,7 +2,26 @@
 export default async function handler(request, response) {
   const { ltuid_v2, ltoken_v2, endpoint, server, role_id } = request.query;
   
+  // CORS Headers Helper
+  const setCors = (res) => {
+    res.setHeader('Access-Control-Allow-Credentials', true);
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
+    res.setHeader(
+      'Access-Control-Allow-Headers',
+      'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
+    );
+  };
+
+  if (request.method === 'OPTIONS') {
+    setCors(response);
+    return response.status(200).end();
+  }
+  
+  // --- HOYOLAB PROXY LOGIC ---
+
   if (!ltuid_v2 || !ltoken_v2) {
+    setCors(response);
     return response.status(400).json({ retcode: -1, message: "Missing credentials" });
   }
 
@@ -41,7 +60,7 @@ export default async function handler(request, response) {
            return response.status(400).json({ retcode: -1, message: "Missing server or role_id for character_detail" });
       }
       
-      // Keep credentials in URL as requested, but also add to body as the error suggests they are needed there
+      // Keep credentials in URL as requested
       url = `https://ho-yo-lab-api-interface.vercel.app/api/character_detail?ltuid_v2=${encodeURIComponent(ltuid_v2)}&ltoken_v2=${encodeURIComponent(ltoken_v2)}&server=${encodeURIComponent(server)}&role_id=${encodeURIComponent(role_id)}&character_ids=`;
       
       options.method = 'POST';
@@ -99,13 +118,11 @@ export default async function handler(request, response) {
     const res = await fetch(url, options);
     const data = await res.json();
     
-    // Set CORS headers
-    response.setHeader('Access-Control-Allow-Credentials', true);
-    response.setHeader('Access-Control-Allow-Origin', '*');
-    
+    setCors(response);
     response.status(200).json(data);
   } catch (error) {
     console.error("Proxy fetch error:", error);
+    setCors(response);
     response.status(500).json({ retcode: -1, message: "Proxy error: " + error.message });
   }
 }
