@@ -2,14 +2,14 @@
 import { GoogleGenAI } from "@google/genai";
 import { UserData } from "../types";
 
-// Initialize AI with the environment key.
-// Ensure your Vercel project has API_KEY defined in Environment Variables.
+// The 'process.env.API_KEY' string is replaced by Vite at build time with the actual key value.
+// We cast it to string to satisfy TypeScript if needed, though usually it's inferred.
 const apiKey = process.env.API_KEY;
 const ai = apiKey ? new GoogleGenAI({ apiKey }) : null;
 
 export const getAccountInsights = async (data: UserData): Promise<string> => {
   if (!ai) {
-    console.warn("API_KEY is missing. Paimon cannot connect to the server.");
+    console.warn("Gemini API Key is missing. Check your Vercel Project Settings or local .env file.");
     return "Paimon can't sense the API key! Please check your Vercel environment variables.";
   }
 
