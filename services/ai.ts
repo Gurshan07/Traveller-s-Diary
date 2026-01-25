@@ -1,8 +1,12 @@
 
-import { GoogleGenAI, Chat, GenerateContentResponse } from "@google/genai";
 import { UserData } from "../types";
 
-let chatSession: Chat | null = null;
+interface Message {
+    role: "system" | "user" | "assistant";
+    content: string;
+}
+
+let history: Message[] = [];
 
 const simplifyData = (data: UserData) => {
     return {
@@ -30,13 +34,6 @@ const simplifyData = (data: UserData) => {
 };
 
 export const initializeChat = async (userData: UserData) => {
-  // Always create a new instance to ensure up-to-date API key from the environment
-  // The environment variable is automatically populated by the AI Studio selection flow
-  const apiKey = process.env.API_KEY;
-  if (!apiKey) throw new Error("API Key not found");
-  
-  const ai = new GoogleGenAI({ apiKey });
-  
   const systemInstruction = `
   You are Paimon, the travel companion from Genshin Impact.
   
@@ -54,22 +51,40 @@ export const initializeChat = async (userData: UserData) => {
   ${JSON.stringify(simplifyData(userData))}
   `;
 
-  chatSession = ai.chats.create({
-    model: 'gemini-3-flash-preview',
-    config: {
-      systemInstruction,
-    },
-  });
+  history = [
+      { role: "system", content: systemInstruction }
+  ];
 };
 
 export const sendMessageToPaimon = async (message: string): Promise<string> => {
-  if (!chatSession) throw new Error("Chat not initialized");
+  const puter = (window as any).puter;
+  if (!puter) return "Paimon can't find the Puter library! (Script not loaded)";
   
+  // Add user message to history
+  history.push({ role: "user", content: message });
+
   try {
-      const response: GenerateContentResponse = await chatSession.sendMessage({ message });
-      return response.text || "Paimon is speechless!";
+      // Puter AI chat call
+      const response = await puter.ai.chat(history);
+      
+      // Handle response parsing
+      let text = "";
+      if (typeof response === 'string') {
+          text = response;
+      } else if (typeof response === 'object' && response !== null) {
+          // @ts-ignore
+          text = response.message?.content || response.content || "Paimon is confused.";
+      } else {
+          text = "Paimon is speechless!";
+      }
+
+      // Add assistant response to history
+      history.push({ role: "assistant", content: text });
+      
+      return text;
   } catch (e) {
       console.error(e);
-      return "Paimon ran into a slime and lost the message! (API Error)";
+      // Remove the last user message if it failed, or just inform user
+      return "Paimon ran into a slime and lost the connection! (AI Error)";
   }
 }

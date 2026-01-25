@@ -59,7 +59,6 @@ const Dashboard: React.FC<DashboardProps> = ({ data }) => {
   const [input, setInput] = useState('');
   const [loadingAi, setLoadingAi] = useState(false);
   const [chatInitialized, setChatInitialized] = useState(false);
-  const [isAiEnabled, setIsAiEnabled] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -79,25 +78,9 @@ const Dashboard: React.FC<DashboardProps> = ({ data }) => {
   }, [data]);
 
   useEffect(() => {
-      // Check if API key is already selected or present in env
-      const checkKey = async () => {
-          if (process.env.API_KEY) {
-              setIsAiEnabled(true);
-              return;
-          }
-
-          const aistudio = (window as any).aistudio;
-          if (aistudio && await aistudio.hasSelectedApiKey()) {
-              setIsAiEnabled(true);
-          }
-      };
-      checkKey();
-  }, []);
-
-  useEffect(() => {
-      // Initialize Paimon Chat ONLY when data is present AND AI is enabled
+      // Initialize Paimon Chat ONLY when data is present
       const init = async () => {
-          if (!data || !isAiEnabled || chatInitialized) return;
+          if (!data || chatInitialized) return;
           
           try {
               await initializeChat(data);
@@ -109,33 +92,11 @@ const Dashboard: React.FC<DashboardProps> = ({ data }) => {
           }
       };
       init();
-  }, [data, isAiEnabled, chatInitialized]);
+  }, [data, chatInitialized]);
 
   useEffect(() => {
       messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
-
-  const handleEnableAi = async () => {
-      // If already enabled via env, just proceed
-      if (process.env.API_KEY) {
-          setIsAiEnabled(true);
-          return;
-      }
-
-      const aistudio = (window as any).aistudio;
-      if (aistudio) {
-          try {
-              await aistudio.openSelectKey();
-              setIsAiEnabled(true);
-              // Trigger init happens via effect
-          } catch (e) { 
-              console.error(e); 
-              alert("Failed to select API key. Please try again.");
-          }
-      } else {
-          alert("API Key missing. Please set the API_KEY environment variable in your deployment settings.");
-      }
-  };
 
   const handleSendMessage = async (e: React.FormEvent) => {
       e.preventDefault();
@@ -288,39 +249,17 @@ const Dashboard: React.FC<DashboardProps> = ({ data }) => {
                    <Sparkles size={16} className="text-purple-400" />
                    <h2 className="text-slate-200 font-bold text-sm uppercase tracking-wide">Chat with Paimon</h2>
                </div>
-               <div className="text-[10px] text-slate-500 bg-white/5 px-2 py-1 rounded">Powered by Gemini</div>
+               <div className="text-[10px] text-slate-500 bg-white/5 px-2 py-1 rounded">Powered by Puter</div>
           </div>
           
-          {!isAiEnabled ? (
-              <div className="absolute inset-0 top-[57px] bg-[#131720]/95 backdrop-blur-sm z-20 flex flex-col items-center justify-center p-6 text-center">
-                    <div className="w-20 h-20 rounded-full bg-gradient-to-br from-[#4e6c8e] to-[#2c3e50] flex items-center justify-center mb-6 animate-float shadow-2xl shadow-blue-500/20">
-                        <Sparkles size={32} className="text-white animate-pulse" />
-                    </div>
-                    <h3 className="text-2xl font-bold text-white mb-3">Wake Paimon Up!</h3>
-                    <p className="text-slate-400 mb-8 max-w-sm leading-relaxed">
-                        Connect your Google account to enable Paimon's AI capabilities. She can analyze your roster, plan upgrades, and chat about your journey!
-                    </p>
-                    <button 
-                        onClick={handleEnableAi}
-                        className="px-6 py-3.5 bg-white hover:bg-slate-100 text-slate-900 font-bold rounded-xl transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 active:translate-y-0 flex items-center gap-3"
-                    >
-                        <img src="https://www.gstatic.com/lamda/images/gemini_sparkle_v002_d4735304ff6292a690345.svg" className="w-5 h-5" alt="" />
-                        Enable with Gemini
-                    </button>
-                    <p className="mt-6 text-[10px] text-slate-600">
-                        Requires a valid API Key from Google AI Studio.
-                    </p>
-              </div>
-          ) : null}
-
           <div className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-thin scrollbar-thumb-slate-700">
                {messages.map((msg, idx) => (
                    <div key={idx} className={`flex gap-3 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                       {msg.role === 'model' && (
+                       {msg.role === 'model' || msg.role === 'assistant' ? (
                            <div className="w-8 h-8 rounded-full bg-slate-800 border border-white/10 overflow-hidden shrink-0 mt-1 shadow-sm">
                                <img src="https://upload-os-bbs.hoyolab.com/upload/2024/02/20/10904121/6b7617511c1d072f95438848417c800c_7185074244583196884.png" alt="Paimon" className="w-full h-full object-cover scale-110" referrerPolicy="no-referrer" />
                            </div>
-                       )}
+                       ) : null}
                        <div className={`max-w-[80%] rounded-2xl p-3 text-sm leading-relaxed shadow-sm ${
                            msg.role === 'user' 
                            ? 'bg-[#4e6c8e] text-white rounded-tr-none' 
@@ -358,13 +297,13 @@ const Dashboard: React.FC<DashboardProps> = ({ data }) => {
                        type="text" 
                        value={input}
                        onChange={(e) => setInput(e.target.value)}
-                       placeholder={isAiEnabled ? "Ask Paimon about your characters..." : "Paimon is sleeping..."}
+                       placeholder="Ask Paimon about your characters..."
                        className="flex-1 bg-[#0c0f16] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-slate-200 focus:outline-none focus:ring-1 focus:ring-[#4e6c8e] transition-all disabled:opacity-50"
-                       disabled={loadingAi || !chatInitialized || !isAiEnabled}
+                       disabled={loadingAi || !chatInitialized}
                    />
                    <button 
                        type="submit" 
-                       disabled={loadingAi || !chatInitialized || !input.trim() || !isAiEnabled}
+                       disabled={loadingAi || !chatInitialized || !input.trim()}
                        className="bg-[#4e6c8e] hover:bg-[#3d5a7a] text-white p-2.5 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
                    >
                        <Send size={18} />
