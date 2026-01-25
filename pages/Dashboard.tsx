@@ -79,8 +79,13 @@ const Dashboard: React.FC<DashboardProps> = ({ data }) => {
   }, [data]);
 
   useEffect(() => {
-      // Check if API key is already selected
+      // Check if API key is already selected or present in env
       const checkKey = async () => {
+          if (process.env.API_KEY) {
+              setIsAiEnabled(true);
+              return;
+          }
+
           const aistudio = (window as any).aistudio;
           if (aistudio && await aistudio.hasSelectedApiKey()) {
               setIsAiEnabled(true);
@@ -111,6 +116,12 @@ const Dashboard: React.FC<DashboardProps> = ({ data }) => {
   }, [messages]);
 
   const handleEnableAi = async () => {
+      // If already enabled via env, just proceed
+      if (process.env.API_KEY) {
+          setIsAiEnabled(true);
+          return;
+      }
+
       const aistudio = (window as any).aistudio;
       if (aistudio) {
           try {
@@ -122,7 +133,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data }) => {
               alert("Failed to select API key. Please try again.");
           }
       } else {
-          alert("Google AI Studio environment not detected.");
+          alert("API Key missing. Please set the API_KEY environment variable in your deployment settings.");
       }
   };
 
