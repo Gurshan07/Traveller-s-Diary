@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { UserData, RoleCombatData, HardChallengeData } from '../types';
 import { fetchRoleCombat, fetchHardChallenges } from '../services/api';
 import { initializeChat, sendMessageToPaimon } from '../services/ai';
-import { HelpCircle, Swords, Drama, Zap, Clock, Download, Sparkles, Send, Bot, User, LogIn, Lock } from 'lucide-react';
+import { HelpCircle, Swords, Drama, Zap, Clock, Download, Sparkles, Send, Bot, User, LogIn, Lock, LogOut } from 'lucide-react';
 
 interface DashboardProps {
   data: UserData;
@@ -122,10 +122,30 @@ const Dashboard: React.FC<DashboardProps> = ({ data }) => {
           // Re-affirm chat init
           if (data) {
               await initializeChat(data);
-              setMessages(prev => [...prev, { role: 'model', text: "Paimon is now connected to the Irminsul (Logged In)! I know everything about your adventure now!" }]);
+              setMessages(prev => [...prev, { role: 'model', text: "Paimon is connected to the Irminsul! I can see your adventure data now!" }]);
           }
       } catch (e) {
           console.error("Login failed", e);
+      }
+  };
+  
+  const handleSwitchAccount = async () => {
+      const puter = (window as any).puter;
+      if (!puter) return;
+      try {
+          // Sign out first to force account selection on next sign in
+          await puter.auth.signOut();
+          setIsPuterAuthenticated(false);
+          // Trigger sign in again
+          await puter.auth.signIn();
+          setIsPuterAuthenticated(true);
+          // Re-affirm chat init
+          if (data) {
+              await initializeChat(data);
+              setMessages([{ role: 'model', text: "Paimon is ready with the new account!" }]);
+          }
+      } catch (e) {
+          console.error("Switch account failed", e);
       }
   };
 
@@ -280,11 +300,20 @@ const Dashboard: React.FC<DashboardProps> = ({ data }) => {
                    <Sparkles size={16} className="text-purple-400" />
                    <h2 className="text-slate-200 font-bold text-sm uppercase tracking-wide">Chat with Paimon</h2>
                </div>
-               <div className="flex items-center gap-2">
+               <div className="flex items-center gap-3">
                    {isPuterAuthenticated ? (
-                       <span className="flex items-center gap-1 text-[10px] text-green-400 bg-green-900/20 px-2 py-0.5 rounded border border-green-800/50">
-                           <Lock size={8} /> Secure
-                       </span>
+                       <>
+                           <span className="flex items-center gap-1 text-[10px] text-green-400 bg-green-900/20 px-2 py-0.5 rounded border border-green-800/50">
+                               <Lock size={8} /> Secure
+                           </span>
+                           <button 
+                               onClick={handleSwitchAccount}
+                               className="flex items-center gap-1 text-[10px] text-slate-400 hover:text-white bg-white/5 hover:bg-white/10 px-2 py-0.5 rounded border border-white/5 transition-colors"
+                               title="Switch Google Account"
+                           >
+                               <LogOut size={8} /> Switch
+                           </button>
+                       </>
                    ) : null}
                    <div className="text-[10px] text-slate-500 bg-white/5 px-2 py-1 rounded">Powered by Puter</div>
                </div>
