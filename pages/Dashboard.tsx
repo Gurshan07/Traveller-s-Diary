@@ -1,7 +1,8 @@
 
 import React, { useEffect, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { UserData, RoleCombatData, HardChallengeData, SpiralAbyssData } from '../types';
+import { UserData, RoleCombatData, HardChallengeData, SpiralAbyssData, ElementType } from '../types';
+import { ELEMENT_ICONS } from '../constants';
 import { fetchRoleCombat, fetchHardChallenges, fetchSpiralAbyss } from '../services/api';
 import { initializeChat, sendMessageToPaimon, resetChatHistory } from '../services/ai';
 import { HelpCircle, Swords, Drama, Zap, Clock, Download, Sparkles, Send, Bot, User, LogIn, Lock, LogOut, Loader2 } from 'lucide-react';
@@ -12,6 +13,35 @@ interface DashboardProps {
 }
 
 // --- Rich Text Rendering Components ---
+
+const ElementBadge: React.FC<{ element: string }> = ({ element }) => {
+    // Map string to ElementType safely
+    const el = element as ElementType;
+    const icon = ELEMENT_ICONS[el];
+
+    if (!icon) return <span>{element}</span>;
+
+    const colors: Record<string, string> = {
+        Pyro: 'text-[#ff9999] bg-[#ff9999]/10 border-[#ff9999]/20',
+        Hydro: 'text-[#80c0ff] bg-[#80c0ff]/10 border-[#80c0ff]/20',
+        Anemo: 'text-[#80ffd7] bg-[#80ffd7]/10 border-[#80ffd7]/20',
+        Electro: 'text-[#ffacff] bg-[#ffacff]/10 border-[#ffacff]/20',
+        Dendro: 'text-[#a5c83b] bg-[#a5c83b]/10 border-[#a5c83b]/20',
+        Cryo: 'text-[#99ffff] bg-[#99ffff]/10 border-[#99ffff]/20',
+        Geo: 'text-[#ffe699] bg-[#ffe699]/10 border-[#ffe699]/20',
+    };
+
+    const styleClass = colors[element] || 'text-slate-200 bg-slate-700/50';
+
+    return (
+        <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md border text-xs font-bold align-middle mx-1 select-none ${styleClass}`}>
+            <span className="w-3.5 h-3.5 flex-shrink-0 drop-shadow-sm">
+                {icon}
+            </span>
+            <span>{element}</span>
+        </span>
+    );
+};
 
 const InlineText: React.FC<{ text: string }> = ({ text }) => {
     // 1. Split by Bold (**text**)
@@ -28,16 +58,10 @@ const InlineText: React.FC<{ text: string }> = ({ text }) => {
                     const elementParts = part.split(/(Pyro|Hydro|Anemo|Electro|Dendro|Cryo|Geo)/g);
                     return elementParts.map((subPart, j) => {
                          const key = `${i}-${j}`;
-                         switch(subPart) {
-                             case 'Pyro': return <span key={key} className="text-[#ff9999] font-medium">Pyro</span>;
-                             case 'Hydro': return <span key={key} className="text-[#80c0ff] font-medium">Hydro</span>;
-                             case 'Anemo': return <span key={key} className="text-[#80ffd7] font-medium">Anemo</span>;
-                             case 'Electro': return <span key={key} className="text-[#ffacff] font-medium">Electro</span>;
-                             case 'Dendro': return <span key={key} className="text-[#a5c83b] font-medium">Dendro</span>;
-                             case 'Cryo': return <span key={key} className="text-[#99ffff] font-medium">Cryo</span>;
-                             case 'Geo': return <span key={key} className="text-[#ffe699] font-medium">Geo</span>;
-                             default: return <span key={key}>{subPart}</span>;
+                         if (['Pyro', 'Hydro', 'Anemo', 'Electro', 'Dendro', 'Cryo', 'Geo'].includes(subPart)) {
+                             return <ElementBadge key={key} element={subPart} />;
                          }
+                         return <span key={key}>{subPart}</span>;
                     });
                 }
             })}
@@ -58,7 +82,7 @@ const FormattedMessage: React.FC<{ text: string }> = ({ text }) => {
                 if (trimmed.startsWith('- ') || trimmed.startsWith('* ')) {
                     const content = trimmed.substring(2);
                     return (
-                        <div key={i} className="flex gap-2 ml-1">
+                        <div key={i} className="flex gap-2 ml-1 items-start">
                             <div className="w-1.5 h-1.5 rounded-full bg-[#d3bc8e] mt-2 shrink-0 opacity-80" />
                             <p className="text-sm leading-relaxed text-slate-200"><InlineText text={content} /></p>
                         </div>
@@ -67,7 +91,7 @@ const FormattedMessage: React.FC<{ text: string }> = ({ text }) => {
                 
                 // Handle Headers
                 if (trimmed.startsWith('## ')) {
-                     return <h3 key={i} className="text-base font-bold text-[#d3bc8e] mt-3 mb-1"><InlineText text={trimmed.substring(3)} /></h3>
+                     return <h3 key={i} className="text-base font-bold text-[#d3bc8e] mt-3 mb-1 flex items-center gap-2"><Sparkles size={14} /><InlineText text={trimmed.substring(3)} /></h3>
                 }
 
                 // Standard Paragraph
@@ -147,6 +171,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data }) => {
   const chatInitialized = chatUid === data?.uid && !isAiLoadingContext;
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // Master Data Fetcher for Dashboard + AI
   useEffect(() => {
@@ -242,13 +267,19 @@ const Dashboard: React.FC<DashboardProps> = ({ data }) => {
       }
   };
 
-  const handleSendMessage = async (e: React.FormEvent) => {
-      e.preventDefault();
+  const handleSendMessage = async (e?: React.FormEvent) => {
+      if (e) e.preventDefault();
+      
       if (!input.trim() || !chatInitialized || loadingAi || !isPuterAuthenticated) return;
 
       const userMsg = input.trim();
       addMessage({ role: 'user', text: userMsg });
       setInput('');
+      // Reset height
+      if (textareaRef.current) {
+          textareaRef.current.style.height = 'auto';
+      }
+      
       setLoadingAi(true);
 
       try {
@@ -259,6 +290,20 @@ const Dashboard: React.FC<DashboardProps> = ({ data }) => {
       } finally {
           setLoadingAi(false);
       }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
+          handleSendMessage();
+      }
+  };
+  
+  const handleInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+      setInput(e.target.value);
+      // Auto-resize
+      e.target.style.height = 'auto';
+      e.target.style.height = Math.min(e.target.scrollHeight, 120) + 'px';
   };
 
   const handleDownloadData = () => {
@@ -500,19 +545,21 @@ const Dashboard: React.FC<DashboardProps> = ({ data }) => {
           </div>
 
           <div className="p-4 bg-[#181d29] border-t border-white/5">
-               <form onSubmit={handleSendMessage} className="flex gap-2">
-                   <input 
-                       type="text" 
+               <form onSubmit={(e) => handleSendMessage(e)} className="flex gap-2 items-end">
+                   <textarea
+                       ref={textareaRef}
                        value={input}
-                       onChange={(e) => setInput(e.target.value)}
+                       onChange={handleInput}
+                       onKeyDown={handleKeyDown}
+                       rows={1}
                        placeholder={!chatInitialized ? "Paimon is getting ready..." : "Ask Paimon about your characters..."}
-                       className="flex-1 bg-[#0c0f16] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-slate-200 focus:outline-none focus:ring-1 focus:ring-[#4e6c8e] transition-all disabled:opacity-50"
+                       className="flex-1 bg-[#0c0f16] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-slate-200 focus:outline-none focus:ring-1 focus:ring-[#4e6c8e] transition-all disabled:opacity-50 resize-none max-h-[120px]"
                        disabled={loadingAi || !chatInitialized || !isPuterAuthenticated}
                    />
                    <button 
                        type="submit" 
                        disabled={loadingAi || !chatInitialized || !input.trim() || !isPuterAuthenticated}
-                       className="bg-[#4e6c8e] hover:bg-[#3d5a7a] text-white p-2.5 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
+                       className="bg-[#4e6c8e] hover:bg-[#3d5a7a] text-white p-2.5 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-lg mb-0.5"
                    >
                        <Send size={18} />
                    </button>
