@@ -101,10 +101,10 @@ const Dashboard: React.FC<DashboardProps> = ({ data }) => {
         
         {/* --- ZONE 1: COMPACT HERO SECTION --- */}
         <div className="relative rounded-[2rem] overflow-hidden h-[260px] flex items-end p-8 group border border-white/5 shadow-2xl">
-             {/* Background Image */}
+             {/* Background Image - Using a reliable Picsum image with specific ID for consistency */}
              <div className="absolute inset-0 bg-[#080a0f]">
                  <img 
-                    src="https://fastcdn.hoyoverse.com/content/v1/5b0d8726e6d34e2c8e312891316b9318_1573641249.png" 
+                    src="https://picsum.photos/id/1042/1200/600" 
                     className="absolute inset-0 w-full h-full object-cover opacity-30 mix-blend-luminosity group-hover:scale-105 transition-transform duration-[20s]"
                     alt="Background"
                  />
@@ -117,12 +117,14 @@ const Dashboard: React.FC<DashboardProps> = ({ data }) => {
                  <div className="flex items-end gap-5">
                       <div className="relative shrink-0">
                            <div className="w-20 h-20 md:w-24 md:h-24 rounded-full p-0.5 bg-gradient-to-b from-[#ffe175] to-[#8c7b5b] shadow-[0_0_20px_rgba(255,225,117,0.4)]">
-                               <img 
-                                  src={data.profileIcon || "https://github.com/shadcn.png"} 
-                                  className="w-full h-full rounded-full object-cover border-4 border-[#080a0f] bg-[#1c212e]" 
-                                  alt="Traveler"
-                                  referrerPolicy="no-referrer"
-                               />
+                               <div className="w-full h-full rounded-full border-4 border-[#080a0f] bg-[#1c212e] overflow-hidden">
+                                   <img 
+                                      src={data.profileIcon || "https://github.com/shadcn.png"} 
+                                      className="w-full h-full object-cover" 
+                                      alt="Traveler"
+                                      referrerPolicy="no-referrer"
+                                   />
+                               </div>
                            </div>
                            <div className="absolute -bottom-2 -right-1 bg-[#080a0f] text-[#ffe175] text-[10px] font-bold px-2 py-0.5 rounded-md border border-[#ffe175]/30 shadow-lg">
                                AR {data.level}

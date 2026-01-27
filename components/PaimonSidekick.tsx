@@ -10,8 +10,8 @@ interface PaimonSidekickProps {
     context: string; 
 }
 
-// Reliable Paimon Source
-const PAIMON_IMG = "https://img.game8.co/3246313/f5e3f42299849208034a742df5258e72.png/show";
+// Reliable Paimon Source (GitHub Raw)
+const PAIMON_IMG = "https://raw.githubusercontent.com/MadeBaruna/paimon-moe/main/static/images/paimon.png";
 
 const QuickChip: React.FC<{ label: string; icon: React.ReactNode; onClick: () => void }> = ({ label, icon, onClick }) => (
     <button 

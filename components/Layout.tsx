@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Users, Swords, Map, Menu, X, Ghost, LogOut, Medal, Drama, Zap, Settings, Star } from 'lucide-react';
+import { LayoutDashboard, Users, Swords, Map, Menu, X, Ghost, LogOut, Medal, Drama, Zap } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useChat } from '../contexts/ChatContext';
 import { fetchRoleCombat, fetchHardChallenges, fetchSpiralAbyss } from '../services/api';
@@ -93,20 +93,21 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
       {/* --- LEFT NAVIGATION RAIL --- */}
       <aside className={`
-          fixed inset-y-0 left-0 z-50 flex flex-col bg-[#0c0f16]/80 backdrop-blur-xl border-r border-white/10 transition-all duration-300
+          fixed inset-y-0 left-0 z-50 flex flex-col bg-[#0c0f16]/90 backdrop-blur-xl border-r border-white/10 transition-all duration-300 ease-[cubic-bezier(0.25,0.1,0.25,1)]
+          overflow-x-hidden shadow-2xl
           ${isMobileMenuOpen ? 'w-64 translate-x-0' : 'w-0 -translate-x-full lg:w-20 lg:translate-x-0 group hover:w-64'}
       `}>
           {/* Logo Area */}
-          <div className="h-16 flex items-center justify-center border-b border-white/10 shrink-0 overflow-hidden relative">
-              <div className="w-10 h-10 bg-gradient-to-br from-[#d3bc8e] to-[#f3a65b] rounded-full flex items-center justify-center shrink-0 shadow-[0_0_15px_rgba(255,200,100,0.5)]">
+          <div className="h-16 flex items-center justify-start px-5 border-b border-white/10 shrink-0 relative overflow-hidden">
+              <div className="w-10 h-10 bg-gradient-to-br from-[#d3bc8e] to-[#f3a65b] rounded-full flex items-center justify-center shrink-0 shadow-[0_0_15px_rgba(255,200,100,0.5)] z-10 relative">
                   <Ghost className="text-[#0c0f16]" size={20} />
               </div>
-              <span className="absolute left-20 whitespace-nowrap font-serif font-bold text-[#d3bc8e] opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+              <span className="ml-4 whitespace-nowrap font-serif font-bold text-[#d3bc8e] text-lg opacity-0 group-hover:opacity-100 transition-all duration-300 transform group-hover:translate-x-0 -translate-x-4 absolute left-14">
                   Traveller's Diary
               </span>
           </div>
 
-          <nav className="flex-1 py-6 px-3 space-y-2 overflow-y-auto scrollbar-none">
+          <nav className="flex-1 py-6 px-3 space-y-2 overflow-y-auto overflow-x-hidden scrollbar-none">
               {navItems.map((item) => (
                   <NavLink
                       key={item.path}
@@ -146,10 +147,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                </div>
                <button 
                   onClick={handleLogout}
-                  className="mt-4 flex items-center justify-center w-full h-10 rounded-lg border border-red-500/20 text-red-400 hover:bg-red-500/10 hover:border-red-500/50 transition-all opacity-0 group-hover:opacity-100 duration-200"
+                  className="mt-4 flex items-center justify-center w-full h-10 rounded-lg border border-red-500/20 text-red-400 hover:bg-red-500/10 hover:border-red-500/50 transition-all opacity-0 group-hover:opacity-100 duration-200 overflow-hidden"
                >
-                  <LogOut size={16} />
-                  <span className="ml-2 text-xs font-bold uppercase">Logout</span>
+                  <LogOut size={16} className="shrink-0" />
+                  <span className="ml-2 text-xs font-bold uppercase whitespace-nowrap">Logout</span>
                </button>
           </div>
       </aside>
