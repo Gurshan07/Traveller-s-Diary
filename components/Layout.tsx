@@ -123,15 +123,19 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                               : 'text-slate-400 hover:bg-white/10 hover:text-white'}
                       `}
                   >
-                      <div className="shrink-0 flex items-center justify-center w-6">{item.icon}</div>
-                      
-                      {/* Label - Absolute to prevent width pushing, fades in on hover */}
-                      <div className="absolute left-14 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 font-medium tracking-wide">
-                          {item.label}
-                      </div>
-                      
-                      {({ isActive }: any) => isActive && (
-                          <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-[#ffe175] rounded-r-full shadow-[0_0_10px_#ffe175]"></div>
+                      {({ isActive }: any) => (
+                          <>
+                              <div className="shrink-0 flex items-center justify-center w-6">{item.icon}</div>
+                              
+                              {/* Label - Absolute to prevent width pushing, fades in on hover */}
+                              <div className="absolute left-14 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 font-medium tracking-wide">
+                                  {item.label}
+                              </div>
+                              
+                              {isActive && (
+                                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-[#ffe175] rounded-r-full shadow-[0_0_10px_#ffe175]"></div>
+                              )}
+                          </>
                       )}
                   </NavLink>
               ))}

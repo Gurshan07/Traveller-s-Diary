@@ -4,14 +4,17 @@ import { useChat } from '../contexts/ChatContext';
 import { sendMessageToPaimon } from '../services/ai';
 import { Send, Bot, Sparkles, X, GripHorizontal, Lightbulb, Ghost } from 'lucide-react';
 import { UserData } from '../types';
+// Importing local asset as requested
+// Note: Ensure 'paimon.png' exists in 'src/assets/'
+import paimonLocal from '../assets/paimon.png';
 
 interface PaimonSidekickProps {
     userData: UserData;
     context: string; 
 }
 
-// Reliable Paimon Source (GitHub Raw)
-const PAIMON_DEFAULT = "https://github.com/MadeBaruna/paimon-moe/blob/main/static/images/paimon.png?raw=true";
+// Use the local import
+const PAIMON_DEFAULT = paimonLocal;
 
 const QuickChip: React.FC<{ label: string; icon: React.ReactNode; onClick: () => void }> = ({ label, icon, onClick }) => (
     <button 
