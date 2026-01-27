@@ -1,8 +1,7 @@
 
 import React from 'react';
-import { UserData, ElementType } from '../types';
-import { ELEMENT_ICONS, BG_GRADIENTS } from '../constants';
-import { Swords, Map, User, Trophy, Calendar, Sparkles, Compass, Star } from 'lucide-react';
+import { UserData } from '../types';
+import { Swords, Map, User, Trophy, Calendar, Sparkles, Compass, Star, ChevronRight, Scroll, Clock } from 'lucide-react';
 
 interface DashboardProps {
   data: UserData;
@@ -43,23 +42,37 @@ const StatNode: React.FC<{
     </div>
 );
 
-// Journey Event Item
-const TimelineItem: React.FC<{ title: string; date?: string; type: 'Combat' | 'Acquisition' | 'Exploration' }> = ({ title, date, type }) => {
-    const icons = {
-        Combat: <Swords size={14} className="text-red-400" />,
-        Acquisition: <Star size={14} className="text-yellow-400" />,
-        Exploration: <Compass size={14} className="text-green-400" />
+// New Quest Log Item
+const QuestLogItem: React.FC<{ title: string; desc: string; time: string; type: 'Combat' | 'Loot' | 'World' }> = ({ title, desc, time, type }) => {
+    const typeConfig = {
+        Combat: { icon: <Swords size={16} />, color: 'text-red-400', bg: 'bg-red-500/10' },
+        Loot: { icon: <Star size={16} />, color: 'text-yellow-400', bg: 'bg-yellow-500/10' },
+        World: { icon: <Map size={16} />, color: 'text-green-400', bg: 'bg-green-500/10' }
     };
+    
+    const cfg = typeConfig[type];
 
     return (
-        <div className="flex items-center gap-4 p-3 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 transition-colors min-w-[280px]">
-             <div className="w-8 h-8 rounded-full bg-[#0c0f16] flex items-center justify-center border border-white/10 shrink-0">
-                 {icons[type]}
-             </div>
-             <div>
-                 <div className="text-sm font-bold text-slate-200">{title}</div>
-                 <div className="text-[10px] text-slate-500 font-mono uppercase">{date || 'Recent'}</div>
-             </div>
+        <div className="flex gap-4 group">
+            {/* Timeline Line */}
+            <div className="flex flex-col items-center">
+                 <div className={`w-8 h-8 rounded-full ${cfg.bg} ${cfg.color} border border-white/10 flex items-center justify-center shrink-0 z-10`}>
+                     {cfg.icon}
+                 </div>
+                 <div className="w-0.5 flex-1 bg-white/5 group-last:hidden mt-2"></div>
+            </div>
+            
+            <div className="flex-1 pb-8 group-last:pb-0">
+                <div className="bg-[#1c212e]/50 border border-white/5 rounded-xl p-4 hover:border-white/10 transition-colors">
+                     <div className="flex justify-between items-start mb-1">
+                         <h4 className="font-bold text-slate-200 text-sm">{title}</h4>
+                         <span className="text-[10px] font-mono text-slate-500 flex items-center gap-1">
+                             <Clock size={10} /> {time}
+                         </span>
+                     </div>
+                     <p className="text-xs text-slate-400 leading-relaxed">{desc}</p>
+                </div>
+            </div>
         </div>
     );
 };
@@ -71,7 +84,6 @@ const Dashboard: React.FC<DashboardProps> = ({ data }) => {
   const abyssFloor = data.stats?.spiral_abyss || "N/A";
   const charCount = data.stats?.characters_obtained || 0;
   
-  // Calculate average exploration
   const avgExploration = React.useMemo(() => {
       const regions = data.regions || [];
       if (regions.length === 0) return 0;
@@ -84,10 +96,10 @@ const Dashboard: React.FC<DashboardProps> = ({ data }) => {
         
         {/* --- ZONE 1: HERO SECTION --- */}
         <div className="relative rounded-[2.5rem] overflow-hidden min-h-[400px] flex items-end p-8 md:p-12 group">
-             {/* Background Image (Mocked for now, usually Namecard) */}
+             {/* Background Image */}
              <div className="absolute inset-0 bg-[#0c0f16]">
                  <img 
-                    src="https://fastcdn.hoyoverse.com/content/v1/5b0d8726e6d34e2c8e312891316b9318_1573641249.png" // Paimon BG placeholder or Namecard
+                    src="https://fastcdn.hoyoverse.com/content/v1/5b0d8726e6d34e2c8e312891316b9318_1573641249.png" 
                     className="absolute inset-0 w-full h-full object-cover opacity-20 mix-blend-luminosity group-hover:scale-105 transition-transform duration-[20s]"
                     alt="Background"
                  />
@@ -97,7 +109,6 @@ const Dashboard: React.FC<DashboardProps> = ({ data }) => {
 
              <div className="relative z-10 w-full flex flex-col md:flex-row justify-between items-end gap-8">
                  <div className="flex items-end gap-6">
-                      {/* Avatar with Ring */}
                       <div className="relative shrink-0">
                            <div className="w-24 h-24 md:w-32 md:h-32 rounded-full p-1 bg-gradient-to-b from-[#d3bc8e] to-[#8c7b5b] shadow-[0_0_40px_rgba(211,188,142,0.3)]">
                                <img 
@@ -140,22 +151,20 @@ const Dashboard: React.FC<DashboardProps> = ({ data }) => {
              </div>
         </div>
 
-        {/* --- ZONE 2: PERFORMANCE OVERVIEW (Constellation Grid) --- */}
+        {/* --- ZONE 2: PERFORMANCE OVERVIEW --- */}
         <div>
             <h2 className="text-xl font-serif font-bold text-slate-200 mb-6 flex items-center gap-3">
                 <Sparkles size={20} className="text-[#d3bc8e]" />
                 Adventure Overview
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                 {/* Abyss Node */}
                  <StatNode 
                      label="Spiral Abyss" 
                      value={abyssFloor} 
                      icon={<Swords size={20} />} 
                      subtext={`${data.abyss.stars} Stars collected`}
-                     accentColor="indigo" // Tailwind class builder needs safelist or strict names, assuming safelist for example
+                     accentColor="indigo"
                  />
-                 {/* Collection Node */}
                  <StatNode 
                      label="Characters" 
                      value={charCount} 
@@ -163,7 +172,6 @@ const Dashboard: React.FC<DashboardProps> = ({ data }) => {
                      subtext="Full Roster Size"
                      accentColor="orange"
                  />
-                 {/* Exploration Node */}
                  <StatNode 
                      label="World Explored" 
                      value={`${avgExploration}%`} 
@@ -171,7 +179,6 @@ const Dashboard: React.FC<DashboardProps> = ({ data }) => {
                      subtext="Average Completion"
                      accentColor="green"
                  />
-                 {/* Achievements Node */}
                  <StatNode 
                      label="Achievements" 
                      value={achievements} 
@@ -182,25 +189,90 @@ const Dashboard: React.FC<DashboardProps> = ({ data }) => {
             </div>
         </div>
 
-        {/* --- ZONE 3: JOURNEY SNAPSHOT (Horizontal Scroll) --- */}
-        <div>
-            <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-serif font-bold text-slate-200 flex items-center gap-3">
-                    <Compass size={20} className="text-[#d3bc8e]" />
-                    Recent Journey
-                </h2>
-                <button className="text-xs font-bold text-[#d3bc8e] hover:text-white transition-colors uppercase tracking-widest">
-                    View Full Log
-                </button>
+        {/* --- ZONE 3: QUEST LOG (Recent Journey) --- */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-2">
+                <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-xl font-serif font-bold text-slate-200 flex items-center gap-3">
+                        <Scroll size={20} className="text-[#d3bc8e]" />
+                        Adventure Log
+                    </h2>
+                    <button className="flex items-center gap-1 text-xs font-bold text-[#d3bc8e] hover:text-white transition-colors uppercase tracking-widest">
+                        View Archive <ChevronRight size={14} />
+                    </button>
+                </div>
+                
+                {/* Vertical Quest Log */}
+                <div className="pl-2">
+                    <QuestLogItem 
+                        type="Combat"
+                        title={`Conquered Floor ${abyssFloor}`}
+                        desc="Successfully cleared the Spiral Abyss floor with 36 stars total."
+                        time="2 Hours Ago"
+                    />
+                    <QuestLogItem 
+                        type="Loot"
+                        title="Acquired 5-Star Artifact"
+                        desc="Obtained 'Sands of Eon' from the Domain of Blessing."
+                        time="5 Hours Ago"
+                    />
+                    <QuestLogItem 
+                        type="World"
+                        title="Explored Fontaine Region"
+                        desc="Reached 65% exploration progress in the Court of Fontaine region."
+                        time="Yesterday"
+                    />
+                    <QuestLogItem 
+                        type="Loot"
+                        title="Achievement Unlocked"
+                        desc="Completed the 'Deepwood' achievement series."
+                        time="2 Days Ago"
+                    />
+                </div>
             </div>
-            
-            {/* Horizontal Scroller */}
-            <div className="flex gap-4 overflow-x-auto pb-6 scrollbar-thin">
-                <TimelineItem title={`Cleared Floor ${abyssFloor}`} type="Combat" />
-                <TimelineItem title="Obtained 5-Star Artifact" type="Acquisition" date="Today" />
-                <TimelineItem title="Explored Fontaine" type="Exploration" date="Yesterday" />
-                <TimelineItem title="Unlocked 'Deepwood' Achievement" type="Acquisition" date="2 Days ago" />
-                <TimelineItem title="Maxed Reputation: Sumeru" type="Exploration" date="1 Week ago" />
+
+            {/* Side Panel: Featured or Radar */}
+            <div className="hidden lg:block">
+                 <h2 className="text-xl font-serif font-bold text-slate-200 mb-6 flex items-center gap-3">
+                    <Compass size={20} className="text-[#d3bc8e]" />
+                    Focus
+                </h2>
+                <div className="glass-panel rounded-3xl p-6 h-full border border-[#d3bc8e]/10 bg-gradient-to-b from-[#1c212e] to-[#131720]">
+                    <div className="text-center mb-6">
+                        <div className="w-16 h-16 mx-auto bg-[#d3bc8e]/10 rounded-full flex items-center justify-center border border-[#d3bc8e]/30 mb-3 text-[#d3bc8e]">
+                            <Compass size={32} />
+                        </div>
+                        <h3 className="font-bold text-white">Exploration Focus</h3>
+                        <p className="text-xs text-slate-400 mt-1">Sumeru is calling!</p>
+                    </div>
+                    
+                    <div className="space-y-4">
+                        <div className="space-y-1">
+                            <div className="flex justify-between text-xs text-slate-300">
+                                <span>Sumeru</span>
+                                <span className="font-bold text-white">82%</span>
+                            </div>
+                            <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+                                <div className="h-full bg-green-500 w-[82%] rounded-full"></div>
+                            </div>
+                        </div>
+                        <div className="space-y-1">
+                            <div className="flex justify-between text-xs text-slate-300">
+                                <span>Fontaine</span>
+                                <span className="font-bold text-white">65%</span>
+                            </div>
+                            <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+                                <div className="h-full bg-blue-500 w-[65%] rounded-full"></div>
+                            </div>
+                        </div>
+                        
+                        <div className="pt-4 mt-4 border-t border-white/5">
+                            <p className="text-xs text-slate-400 italic text-center">
+                                "There are still 42 chests in Sumeru waiting for us!"
+                            </p>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

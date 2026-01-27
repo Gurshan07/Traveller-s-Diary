@@ -84,20 +84,21 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   return (
     <div className="flex h-screen bg-[#080a0f] text-slate-200 overflow-hidden font-sans selection:bg-[#d3bc8e]/30 selection:text-white relative">
       
-      {/* Background Graphic - Global Nebula */}
-      <div className="fixed inset-0 z-0 pointer-events-none">
-         <div className="absolute top-[-20%] left-[-10%] w-[80vw] h-[80vw] bg-indigo-950/20 rounded-full blur-[150px] animate-pulse-glow"></div>
-         <div className="absolute bottom-[-20%] right-[-10%] w-[60vw] h-[60vw] bg-purple-950/20 rounded-full blur-[150px] animate-float"></div>
+      {/* Background Graphic - Global Nebula (More Vibrant) */}
+      <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+         <div className="absolute top-[-10%] left-[-10%] w-[60vw] h-[60vw] bg-indigo-600/30 rounded-full blur-[120px] animate-pulse-glow mix-blend-screen"></div>
+         <div className="absolute bottom-[-10%] right-[-10%] w-[60vw] h-[60vw] bg-purple-600/30 rounded-full blur-[120px] animate-float mix-blend-screen"></div>
+         <div className="absolute top-[40%] left-[30%] w-[40vw] h-[40vw] bg-blue-500/10 rounded-full blur-[100px] animate-float animation-delay-2000"></div>
       </div>
 
       {/* --- LEFT NAVIGATION RAIL --- */}
       <aside className={`
-          fixed inset-y-0 left-0 z-50 flex flex-col bg-[#0c0f16]/90 backdrop-blur-xl border-r border-white/5 transition-all duration-300
+          fixed inset-y-0 left-0 z-50 flex flex-col bg-[#0c0f16]/80 backdrop-blur-xl border-r border-white/10 transition-all duration-300
           ${isMobileMenuOpen ? 'w-64 translate-x-0' : 'w-0 -translate-x-full lg:w-20 lg:translate-x-0 group hover:w-64'}
       `}>
           {/* Logo Area */}
-          <div className="h-16 flex items-center justify-center border-b border-white/5 shrink-0 overflow-hidden relative">
-              <div className="w-10 h-10 bg-gradient-to-br from-[#d3bc8e] to-[#8c7b5b] rounded-full flex items-center justify-center shrink-0 shadow-[0_0_15px_rgba(211,188,142,0.3)]">
+          <div className="h-16 flex items-center justify-center border-b border-white/10 shrink-0 overflow-hidden relative">
+              <div className="w-10 h-10 bg-gradient-to-br from-[#d3bc8e] to-[#f3a65b] rounded-full flex items-center justify-center shrink-0 shadow-[0_0_15px_rgba(255,200,100,0.5)]">
                   <Ghost className="text-[#0c0f16]" size={20} />
               </div>
               <span className="absolute left-20 whitespace-nowrap font-serif font-bold text-[#d3bc8e] opacity-0 group-hover:opacity-100 transition-opacity duration-300">
@@ -113,24 +114,24 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                       className={({ isActive }) => `
                           relative flex items-center h-12 px-3 rounded-xl transition-all duration-200 group/item
                           ${isActive 
-                              ? 'bg-[#d3bc8e]/10 text-[#d3bc8e] shadow-[0_0_10px_rgba(211,188,142,0.1)]' 
-                              : 'text-slate-500 hover:bg-white/5 hover:text-slate-200'}
+                              ? 'bg-[#d3bc8e]/20 text-[#ffe175] shadow-[0_0_15px_rgba(211,188,142,0.2)] border border-[#d3bc8e]/20' 
+                              : 'text-slate-400 hover:bg-white/10 hover:text-white'}
                       `}
                   >
                       <div className="shrink-0">{item.icon}</div>
-                      <span className="ml-4 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 font-medium">
+                      <span className="ml-4 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 font-medium tracking-wide">
                           {item.label}
                       </span>
                       {({ isActive }: any) => isActive && (
-                          <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-[#d3bc8e] rounded-r-full"></div>
+                          <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-[#ffe175] rounded-r-full shadow-[0_0_10px_#ffe175]"></div>
                       )}
                   </NavLink>
               ))}
           </nav>
 
-          <div className="p-4 border-t border-white/5 shrink-0">
+          <div className="p-4 border-t border-white/10 shrink-0">
                <div className="flex items-center gap-3 overflow-hidden">
-                    <div className="w-10 h-10 rounded-full border border-white/10 shrink-0 bg-[#131720]">
+                    <div className="w-10 h-10 rounded-full border border-white/20 shrink-0 bg-[#131720] shadow-lg">
                         <img 
                             src={user?.profileIcon || 'https://github.com/shadcn.png'} 
                             alt="User" 
@@ -139,13 +140,13 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                         />
                     </div>
                     <div className="flex flex-col opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap min-w-0">
-                         <span className="text-sm font-bold text-slate-200 truncate">{user?.nickname}</span>
-                         <span className="text-[10px] text-slate-500 uppercase font-bold">{user?.server} • Lv.{user?.level}</span>
+                         <span className="text-sm font-bold text-white truncate">{user?.nickname}</span>
+                         <span className="text-[10px] text-slate-400 uppercase font-bold">{user?.server} • Lv.{user?.level}</span>
                     </div>
                </div>
                <button 
                   onClick={handleLogout}
-                  className="mt-4 flex items-center justify-center w-full h-10 rounded-lg border border-red-900/30 text-red-500 hover:bg-red-950/30 hover:border-red-800 transition-all opacity-0 group-hover:opacity-100 duration-200"
+                  className="mt-4 flex items-center justify-center w-full h-10 rounded-lg border border-red-500/20 text-red-400 hover:bg-red-500/10 hover:border-red-500/50 transition-all opacity-0 group-hover:opacity-100 duration-200"
                >
                   <LogOut size={16} />
                   <span className="ml-2 text-xs font-bold uppercase">Logout</span>
@@ -154,12 +155,12 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       </aside>
 
       {/* --- MOBILE HEADER --- */}
-      <div className="lg:hidden fixed top-0 w-full z-40 bg-[#0c0f16]/90 backdrop-blur-md border-b border-white/5 flex items-center justify-between px-4 h-16">
+      <div className="lg:hidden fixed top-0 w-full z-40 bg-[#0c0f16]/90 backdrop-blur-md border-b border-white/10 flex items-center justify-between px-4 h-16 shadow-lg">
            <div className="flex items-center gap-2">
                <div className="w-8 h-8 bg-[#d3bc8e] rounded-full flex items-center justify-center">
                    <Ghost className="text-[#0c0f16]" size={16} />
                </div>
-               <span className="font-serif font-bold text-slate-200">Traveller's Diary</span>
+               <span className="font-serif font-bold text-slate-100">Traveller's Diary</span>
            </div>
            <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="p-2 text-slate-300">
                {isMobileMenuOpen ? <X /> : <Menu />}
