@@ -82,13 +82,12 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   ];
 
   return (
-    <div className="flex h-screen bg-[#080a0f] text-slate-200 overflow-hidden font-sans selection:bg-[#d3bc8e]/30 selection:text-white">
+    <div className="flex h-screen bg-[#080a0f] text-slate-200 overflow-hidden font-sans selection:bg-[#d3bc8e]/30 selection:text-white relative">
       
       {/* Background Graphic - Global Nebula */}
       <div className="fixed inset-0 z-0 pointer-events-none">
          <div className="absolute top-[-20%] left-[-10%] w-[80vw] h-[80vw] bg-indigo-950/20 rounded-full blur-[150px] animate-pulse-glow"></div>
          <div className="absolute bottom-[-20%] right-[-10%] w-[60vw] h-[60vw] bg-purple-950/20 rounded-full blur-[150px] animate-float"></div>
-         {/* Subtle Noise/Texture Overlay could go here */}
       </div>
 
       {/* --- LEFT NAVIGATION RAIL --- */}
@@ -101,13 +100,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               <div className="w-10 h-10 bg-gradient-to-br from-[#d3bc8e] to-[#8c7b5b] rounded-full flex items-center justify-center shrink-0 shadow-[0_0_15px_rgba(211,188,142,0.3)]">
                   <Ghost className="text-[#0c0f16]" size={20} />
               </div>
-              {/* Text reveals on hover */}
               <span className="absolute left-20 whitespace-nowrap font-serif font-bold text-[#d3bc8e] opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                   Traveller's Diary
               </span>
           </div>
 
-          {/* Navigation Items */}
           <nav className="flex-1 py-6 px-3 space-y-2 overflow-y-auto scrollbar-none">
               {navItems.map((item) => (
                   <NavLink
@@ -124,7 +121,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                       <span className="ml-4 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 font-medium">
                           {item.label}
                       </span>
-                      {/* Active Indicator Bar */}
                       {({ isActive }: any) => isActive && (
                           <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-[#d3bc8e] rounded-r-full"></div>
                       )}
@@ -132,7 +128,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               ))}
           </nav>
 
-          {/* User Profile (Bottom) */}
           <div className="p-4 border-t border-white/5 shrink-0">
                <div className="flex items-center gap-3 overflow-hidden">
                     <div className="w-10 h-10 rounded-full border border-white/10 shrink-0 bg-[#131720]">
@@ -180,10 +175,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           </div>
       </main>
 
-      {/* --- PAIMON PANEL (RIGHT) --- */}
-      <aside className="fixed inset-y-0 right-0 z-30 h-full hidden lg:block shadow-[-10px_0_30px_rgba(0,0,0,0.5)]">
-          {user && <PaimonSidekick userData={user} context={getContext()} />}
-      </aside>
+      {/* --- PAIMON FLOATING SIDEKICK --- */}
+      {user && <PaimonSidekick userData={user} context={getContext()} />}
 
       {/* Mobile Overlay */}
       {isMobileMenuOpen && (
