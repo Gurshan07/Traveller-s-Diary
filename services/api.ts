@@ -177,6 +177,7 @@ export const authenticateAndFetchData = async (credentials: AuthCredentials): Pr
         rarity: char.weapon?.rarity || 1,
         level: char.weapon?.level || 1,
         type: getWeaponType(char.weapon?.type || 1),
+        refinement: char.weapon?.affix_level || 1,
       },
       artifacts: (char.relics || []).map((relic: any) => ({
         set: relic.set?.name || relic.relic_set_name || 'Unknown Set',
@@ -222,6 +223,7 @@ export const authenticateAndFetchData = async (credentials: AuthCredentials): Pr
                                 rarity: detail.weapon.rarity,
                                 level: detail.weapon.level,
                                 type: getWeaponType(detail.weapon.type),
+                                refinement: detail.weapon.affix_level || 1,
                             },
                             artifacts: (detail.relics || []).map((r: any) => ({
                                 set: r.set?.name || r.relic_set_name,

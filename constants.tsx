@@ -19,7 +19,7 @@ export const ELEMENT_ICONS: Record<ElementType, React.ReactNode> = {
   Anemo: <img src="https://enka.network/ui/UI_Buff_Element_Wind.png" alt="Anemo" className="w-full h-full object-contain drop-shadow-[0_0_5px_rgba(100,255,150,0.6)]" referrerPolicy="no-referrer" />,
   Electro: <img src="https://enka.network/ui/UI_Buff_Element_Electric.png" alt="Electro" className="w-full h-full object-contain drop-shadow-[0_0_5px_rgba(200,100,255,0.6)]" referrerPolicy="no-referrer" />,
   Dendro: <img src="https://enka.network/ui/UI_Buff_Element_Grass.png" alt="Dendro" className="w-full h-full object-contain drop-shadow-[0_0_5px_rgba(100,255,50,0.6)]" referrerPolicy="no-referrer" />,
-  Cryo: <img src="https://enka.network/ui/UI_Buff_Element_Ice.png" alt="Cryo" className="w-full h-full object-contain drop-shadow-[0_0_5px_rgba(100,255,255,0.6)]" referrerPolicy="no-referrer" />,
+  Cryo: <img src="https://raw.githubusercontent.com/MadeBaruna/paimon-moe/main/static/images/elements/cryo.png" alt="Cryo" className="w-full h-full object-contain drop-shadow-[0_0_5px_rgba(100,255,255,0.6)]" referrerPolicy="no-referrer" />,
   Geo: <img src="https://enka.network/ui/UI_Buff_Element_Rock.png" alt="Geo" className="w-full h-full object-contain drop-shadow-[0_0_5px_rgba(255,200,50,0.6)]" referrerPolicy="no-referrer" />,
 };
 

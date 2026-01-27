@@ -56,13 +56,26 @@ const simplifyData = (
             stygian_onslaught: onslaughtSummary
         },
         // Limit to top 50 to fit context, prioritizes built characters
-        roster: (data.characters || []).slice(0, 50).map(c => ({
-            n: c.name,
-            lvl: c.level,
-            c: c.constellation,
-            w: c.weapon ? `${c.weapon.name} (R${c.weapon.rarity})` : "No Weapon",
-            sets: c.artifacts?.map(a => a.set).join('+') || "None"
-        })),
+        roster: (data.characters || []).slice(0, 50).map(c => {
+            // Group artifacts for cleaner reading (e.g. "2pc Crimson + 2pc Gladiator")
+            const sets: Record<string, number> = {};
+            c.artifacts?.forEach(a => {
+                sets[a.set] = (sets[a.set] || 0) + 1;
+            });
+            const setStr = Object.entries(sets)
+                .map(([name, count]) => `${count}pc ${name}`)
+                .join(', ');
+
+            return {
+                name: c.name,
+                element: c.element,
+                level: c.level,
+                cons: c.constellation,
+                // Refinement is now included in weapon formatting
+                weapon: c.weapon ? `${c.weapon.name} (Lv.${c.weapon.level} R${c.weapon.refinement})` : "None",
+                artifacts: setStr || "None"
+            };
+        }),
         exploration: (data.regions || []).map(r => `${r.name}:${r.exploration_progress}%`).join(', ')
     };
 };
@@ -79,12 +92,11 @@ export const initializeChat = async (
   You are Paimon, the Traveler's guide and companion in Genshin Impact.
   
   **CRITICAL DIRECTIVES:**
-  1. **USE THE DATA**: You have the user's FULL account data below, including Abyss and Theater stats. **DO NOT GUESS.**
-     - If asked about "Abyss", refer to 'combat_records.spiral_abyss'.
-     - If asked about "Theater", refer to 'combat_records.imaginarium_theater'.
-     - If asked "How is my [Character]?", CHECK the 'roster' list first.
-     - STATE what they are currently wearing (e.g., "Paimon sees you have Black Tassel equipped...").
-  2. **PERSONA**: Speak in third-person ("Paimon thinks...", "Paimon suggests..."). Be cheery, slightly sassy, and concise.
+  1. **USE THE DATA**: You have the user's FULL account data below.
+     - **Roster**: Check the 'roster' list for character builds. It lists Level, Element, Constellations, Weapons (with Refinement), and Artifact Sets.
+     - **Combat**: Use 'combat_records' for Abyss/Theater performance.
+     - **Specifics**: If asked "What weapon does Hu Tao have?", look at the 'roster', find Hu Tao, and read the 'weapon' field.
+  2. **PERSONA**: Speak in third-person ("Paimon thinks...", "Paimon sees..."). Be cheery, slightly sassy, and concise.
   3. **BREVITY**: Keep responses **SHORT** (max 3-4 sentences). NO long bullet lists. Write like a chat message.
   
   **FULL ACCOUNT DATA:**

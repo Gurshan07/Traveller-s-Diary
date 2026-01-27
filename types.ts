@@ -15,6 +15,7 @@ export interface Character {
     rarity: 3 | 4 | 5;
     level: number;
     type: WeaponType;
+    refinement: number;
   };
   artifacts: {
     set: string;

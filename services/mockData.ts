@@ -1,3 +1,4 @@
+
 import { UserData, Character, RegionData } from '../types';
 
 const characters: Character[] = [
@@ -9,7 +10,7 @@ const characters: Character[] = [
     level: 90,
     friendship: 10,
     constellation: 2,
-    weapon: { name: 'Engulfing Lightning', rarity: 5, level: 90, type: 'Polearm' },
+    weapon: { name: 'Engulfing Lightning', rarity: 5, level: 90, type: 'Polearm', refinement: 1 },
     artifacts: [{ set: 'Emblem of Severed Fate', count: 4 }],
     image: 'https://picsum.photos/200/200?random=1'
   },
@@ -21,7 +22,7 @@ const characters: Character[] = [
     level: 90,
     friendship: 10,
     constellation: 1,
-    weapon: { name: 'Aqua Simulacra', rarity: 5, level: 90, type: 'Bow' },
+    weapon: { name: 'Aqua Simulacra', rarity: 5, level: 90, type: 'Bow', refinement: 1 },
     artifacts: [{ set: 'Emblem of Severed Fate', count: 4 }],
     image: 'https://picsum.photos/200/200?random=2'
   },
@@ -33,7 +34,7 @@ const characters: Character[] = [
     level: 90,
     friendship: 10,
     constellation: 1,
-    weapon: { name: 'Staff of Homa', rarity: 5, level: 90, type: 'Polearm' },
+    weapon: { name: 'Staff of Homa', rarity: 5, level: 90, type: 'Polearm', refinement: 1 },
     artifacts: [{ set: 'Crimson Witch of Flames', count: 4 }],
     image: 'https://picsum.photos/200/200?random=3'
   },
@@ -45,7 +46,7 @@ const characters: Character[] = [
     level: 90,
     friendship: 10,
     constellation: 0,
-    weapon: { name: 'Black Tassel', rarity: 3, level: 90, type: 'Polearm' },
+    weapon: { name: 'Black Tassel', rarity: 3, level: 90, type: 'Polearm', refinement: 5 },
     artifacts: [{ set: 'Tenacity of the Millelith', count: 4 }],
     image: 'https://picsum.photos/200/200?random=4'
   },
@@ -57,7 +58,7 @@ const characters: Character[] = [
     level: 90,
     friendship: 9,
     constellation: 2,
-    weapon: { name: 'A Thousand Floating Dreams', rarity: 5, level: 90, type: 'Catalyst' },
+    weapon: { name: 'A Thousand Floating Dreams', rarity: 5, level: 90, type: 'Catalyst', refinement: 1 },
     artifacts: [{ set: 'Deepwood Memories', count: 4 }],
     image: 'https://picsum.photos/200/200?random=5'
   },
@@ -69,7 +70,7 @@ const characters: Character[] = [
     level: 90,
     friendship: 10,
     constellation: 0,
-    weapon: { name: 'Freedom-Sworn', rarity: 5, level: 90, type: 'Sword' },
+    weapon: { name: 'Freedom-Sworn', rarity: 5, level: 90, type: 'Sword', refinement: 1 },
     artifacts: [{ set: 'Viridescent Venerer', count: 4 }],
     image: 'https://picsum.photos/200/200?random=6'
   },
@@ -81,7 +82,7 @@ const characters: Character[] = [
     level: 80,
     friendship: 7,
     constellation: 0,
-    weapon: { name: 'Mistsplitter Reforged', rarity: 5, level: 90, type: 'Sword' },
+    weapon: { name: 'Mistsplitter Reforged', rarity: 5, level: 90, type: 'Sword', refinement: 1 },
     artifacts: [{ set: 'Blizzard Strayer', count: 4 }],
     image: 'https://picsum.photos/200/200?random=7'
   },
@@ -93,7 +94,7 @@ const characters: Character[] = [
     level: 90,
     friendship: 10,
     constellation: 5,
-    weapon: { name: 'Aquila Favonia', rarity: 5, level: 90, type: 'Sword' },
+    weapon: { name: 'Aquila Favonia', rarity: 5, level: 90, type: 'Sword', refinement: 1 },
     artifacts: [{ set: 'Noblesse Oblige', count: 4 }],
     image: 'https://picsum.photos/200/200?random=8'
   },
@@ -105,7 +106,7 @@ const characters: Character[] = [
     level: 80,
     friendship: 10,
     constellation: 6,
-    weapon: { name: 'Sacrificial Sword', rarity: 4, level: 90, type: 'Sword' },
+    weapon: { name: 'Sacrificial Sword', rarity: 4, level: 90, type: 'Sword', refinement: 5 },
     artifacts: [{ set: 'Emblem of Severed Fate', count: 4 }],
     image: 'https://picsum.photos/200/200?random=9'
   }
