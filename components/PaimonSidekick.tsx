@@ -10,8 +10,8 @@ interface PaimonSidekickProps {
     context: string; 
 }
 
-// Reliable Paimon Source (GitHub Raw)
-const PAIMON_IMG = "https://raw.githubusercontent.com/MadeBaruna/paimon-moe/main/static/images/paimon.png";
+// Reliable Paimon Source (Wiki)
+const PAIMON_IMG = "https://static.wikia.nocookie.net/gensin-impact/images/8/80/Paimon_Icon.png";
 
 const QuickChip: React.FC<{ label: string; icon: React.ReactNode; onClick: () => void }> = ({ label, icon, onClick }) => (
     <button 
@@ -211,7 +211,7 @@ const PaimonSidekick: React.FC<PaimonSidekickProps> = ({ userData, context }) =>
                     style={windowStyle}
                     className="w-[340px] flex flex-col bg-[#0c0f16]/95 backdrop-blur-2xl border border-[#ffe175]/20 rounded-3xl shadow-[0_20px_60px_rgba(0,0,0,0.9)] overflow-hidden animate-fade-in ring-1 ring-[#ffe175]/10"
                 >
-                    {/* Header - Now also draggable to move the window if needed (requires separate logic, but for now serves as close bar) */}
+                    {/* Header */}
                     <div className="h-14 bg-gradient-to-r from-[#1c212e] to-[#0c0f16] border-b border-white/10 flex items-center justify-between px-4 select-none">
                          <div className="flex items-center gap-3">
                              <div className="w-9 h-9 rounded-full border border-[#ffe175]/50 bg-[#1c212e] overflow-hidden shadow-lg">

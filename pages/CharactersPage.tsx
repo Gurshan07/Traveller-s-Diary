@@ -238,7 +238,7 @@ const CharactersPage: React.FC<CharactersPageProps> = ({ data }) => {
         {/* Header */}
         <div className="flex-none flex flex-col md:flex-row justify-between items-end gap-4 border-b border-white/10 pb-4 mb-4">
             <div>
-                <h1 className="text-2xl font-serif font-black text-white tracking-wide">Roster</h1>
+                <h1 className="text-2xl font-serif font-black text-white tracking-wide">Characters</h1>
                 <p className="text-slate-400 text-xs">
                     <strong className="text-white">{data.characters?.length}</strong> Companions
                 </p>

@@ -84,45 +84,52 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   return (
     <div className="flex h-screen bg-[#080a0f] text-slate-200 overflow-hidden font-sans selection:bg-[#d3bc8e]/30 selection:text-white relative">
       
-      {/* Background Graphic - Global Nebula (More Vibrant) */}
+      {/* Background Graphic - Global Nebula */}
       <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
          <div className="absolute top-[-10%] left-[-10%] w-[60vw] h-[60vw] bg-indigo-600/30 rounded-full blur-[120px] animate-pulse-glow mix-blend-screen"></div>
          <div className="absolute bottom-[-10%] right-[-10%] w-[60vw] h-[60vw] bg-purple-600/30 rounded-full blur-[120px] animate-float mix-blend-screen"></div>
-         <div className="absolute top-[40%] left-[30%] w-[40vw] h-[40vw] bg-blue-500/10 rounded-full blur-[100px] animate-float animation-delay-2000"></div>
       </div>
 
       {/* --- LEFT NAVIGATION RAIL --- */}
       <aside className={`
-          fixed inset-y-0 left-0 z-50 flex flex-col bg-[#0c0f16]/90 backdrop-blur-xl border-r border-white/10 transition-all duration-300 ease-[cubic-bezier(0.25,0.1,0.25,1)]
-          overflow-x-hidden shadow-2xl
-          ${isMobileMenuOpen ? 'w-64 translate-x-0' : 'w-0 -translate-x-full lg:w-20 lg:translate-x-0 group hover:w-64'}
+          fixed inset-y-0 left-0 z-50 flex flex-col bg-[#0c0f16] border-r border-white/10 transition-all duration-300 ease-[cubic-bezier(0.25,0.1,0.25,1)]
+          shadow-2xl overflow-hidden
+          ${isMobileMenuOpen ? 'w-64 translate-x-0' : 'w-20 lg:translate-x-0 -translate-x-full lg:w-20 hover:lg:w-64 group'}
       `}>
           {/* Logo Area */}
-          <div className="h-16 flex items-center justify-start px-5 border-b border-white/10 shrink-0 relative overflow-hidden">
-              <div className="w-10 h-10 bg-gradient-to-br from-[#d3bc8e] to-[#f3a65b] rounded-full flex items-center justify-center shrink-0 shadow-[0_0_15px_rgba(255,200,100,0.5)] z-10 relative">
+          <div className="h-20 flex items-center px-5 border-b border-white/10 shrink-0 relative w-full overflow-hidden">
+              <div className="w-10 h-10 bg-gradient-to-br from-[#d3bc8e] to-[#f3a65b] rounded-full flex items-center justify-center shrink-0 shadow-[0_0_15px_rgba(255,200,100,0.5)] z-20">
                   <Ghost className="text-[#0c0f16]" size={20} />
               </div>
-              <span className="ml-4 whitespace-nowrap font-serif font-bold text-[#d3bc8e] text-lg opacity-0 group-hover:opacity-100 transition-all duration-300 transform group-hover:translate-x-0 -translate-x-4 absolute left-14">
-                  Traveller's Diary
-              </span>
+              
+              {/* Text Container - Absolute to prevent layout shift of icon, but controlled visibility */}
+              <div className="absolute left-20 top-0 h-full flex items-center pl-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">
+                  <span className="font-serif font-bold text-[#d3bc8e] text-lg tracking-tight">
+                      Traveller's Diary
+                  </span>
+              </div>
           </div>
 
-          <nav className="flex-1 py-6 px-3 space-y-2 overflow-y-auto overflow-x-hidden scrollbar-none">
+          {/* Navigation Items */}
+          <nav className="flex-1 py-6 px-3 space-y-2 overflow-y-auto overflow-x-hidden scrollbar-none w-full">
               {navItems.map((item) => (
                   <NavLink
                       key={item.path}
                       to={item.path}
                       className={({ isActive }) => `
-                          relative flex items-center h-12 px-3 rounded-xl transition-all duration-200 group/item
+                          relative flex items-center h-12 px-3.5 rounded-xl transition-all duration-200 group/item w-full overflow-hidden
                           ${isActive 
                               ? 'bg-[#d3bc8e]/20 text-[#ffe175] shadow-[0_0_15px_rgba(211,188,142,0.2)] border border-[#d3bc8e]/20' 
                               : 'text-slate-400 hover:bg-white/10 hover:text-white'}
                       `}
                   >
-                      <div className="shrink-0">{item.icon}</div>
-                      <span className="ml-4 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 font-medium tracking-wide">
+                      <div className="shrink-0 flex items-center justify-center w-6">{item.icon}</div>
+                      
+                      {/* Label - Absolute to prevent width pushing, fades in on hover */}
+                      <div className="absolute left-14 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 font-medium tracking-wide">
                           {item.label}
-                      </span>
+                      </div>
+                      
                       {({ isActive }: any) => isActive && (
                           <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-[#ffe175] rounded-r-full shadow-[0_0_10px_#ffe175]"></div>
                       )}
@@ -130,9 +137,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               ))}
           </nav>
 
-          <div className="p-4 border-t border-white/10 shrink-0">
-               <div className="flex items-center gap-3 overflow-hidden">
-                    <div className="w-10 h-10 rounded-full border border-white/20 shrink-0 bg-[#131720] shadow-lg">
+          {/* User Footer */}
+          <div className="p-4 border-t border-white/10 shrink-0 w-full overflow-hidden bg-[#080a0f]">
+               <div className="flex items-center gap-4 overflow-hidden h-10">
+                    <div className="w-10 h-10 rounded-full border border-white/20 shrink-0 bg-[#131720] shadow-lg relative z-10">
                         <img 
                             src={user?.profileIcon || 'https://github.com/shadcn.png'} 
                             alt="User" 
@@ -140,11 +148,14 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                             referrerPolicy="no-referrer"
                         />
                     </div>
-                    <div className="flex flex-col opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap min-w-0">
-                         <span className="text-sm font-bold text-white truncate">{user?.nickname}</span>
-                         <span className="text-[10px] text-slate-400 uppercase font-bold">{user?.server} • Lv.{user?.level}</span>
+                    
+                    {/* User Info - Fades in */}
+                    <div className="flex flex-col opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">
+                         <span className="text-sm font-bold text-white truncate max-w-[140px]">{user?.nickname}</span>
+                         <span className="text-[10px] text-slate-400 uppercase font-bold">{user?.server}</span>
                     </div>
                </div>
+               
                <button 
                   onClick={handleLogout}
                   className="mt-4 flex items-center justify-center w-full h-10 rounded-lg border border-red-500/20 text-red-400 hover:bg-red-500/10 hover:border-red-500/50 transition-all opacity-0 group-hover:opacity-100 duration-200 overflow-hidden"

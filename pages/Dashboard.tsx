@@ -116,7 +116,8 @@ const Dashboard: React.FC<DashboardProps> = ({ data }) => {
              <div className="relative z-10 w-full flex flex-col md:flex-row justify-between items-end gap-6">
                  <div className="flex items-end gap-5">
                       <div className="relative shrink-0">
-                           <div className="w-20 h-20 md:w-24 md:h-24 rounded-full p-0.5 bg-gradient-to-b from-[#ffe175] to-[#8c7b5b] shadow-[0_0_20px_rgba(255,225,117,0.4)]">
+                           {/* Updated Profile Background to Dark/Nebula Theme */}
+                           <div className="w-20 h-20 md:w-24 md:h-24 rounded-full p-0.5 bg-gradient-to-br from-[#4e6c8e] to-[#2c3e50] shadow-[0_0_20px_rgba(78,108,142,0.4)]">
                                <div className="w-full h-full rounded-full border-4 border-[#080a0f] bg-[#1c212e] overflow-hidden">
                                    <img 
                                       src={data.profileIcon || "https://github.com/shadcn.png"} 
