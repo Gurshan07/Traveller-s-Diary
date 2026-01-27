@@ -8,9 +8,6 @@ import { fetchRoleCombat, fetchHardChallenges, fetchSpiralAbyss } from '../servi
 import { initializeChat, resetChatHistory } from '../services/ai';
 import PaimonSidekick from './PaimonSidekick';
 
-// Define local asset path manually to avoid ESM import errors
-const paimonAvatar = '/assets/paimon.png';
-
 interface LayoutProps {
   children: React.ReactNode;
 }
@@ -149,7 +146,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                <div className="flex items-center gap-4 overflow-hidden h-10">
                     <div className="w-10 h-10 rounded-full border border-white/20 shrink-0 bg-[#131720] shadow-lg relative z-10">
                         <img 
-                            src={user?.profileIcon || paimonAvatar} 
+                            src={user?.profileIcon || 'https://github.com/shadcn.png'} 
                             alt="User" 
                             className="w-full h-full rounded-full object-cover" 
                             referrerPolicy="no-referrer"
