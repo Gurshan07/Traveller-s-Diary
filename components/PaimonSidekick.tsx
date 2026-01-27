@@ -2,7 +2,7 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { useChat } from '../contexts/ChatContext';
 import { sendMessageToPaimon } from '../services/ai';
-import { Send, Bot, Sparkles, X, MessageSquare, Lightbulb, Zap, ShieldAlert, GripHorizontal } from 'lucide-react';
+import { Send, Bot, Sparkles, X, GripHorizontal, Lightbulb } from 'lucide-react';
 import { UserData } from '../types';
 
 interface PaimonSidekickProps {
@@ -10,13 +10,13 @@ interface PaimonSidekickProps {
     context: string; 
 }
 
-// Reliable Paimon Image URL (Paimon.moe source is usually stable)
-const PAIMON_IMG = "https://raw.githubusercontent.com/MadeBaruna/paimon-moe/main/static/images/paimon.png";
+// Reliable Paimon Source
+const PAIMON_IMG = "https://img.game8.co/3246313/f5e3f42299849208034a742df5258e72.png/show";
 
 const QuickChip: React.FC<{ label: string; icon: React.ReactNode; onClick: () => void }> = ({ label, icon, onClick }) => (
     <button 
         onClick={onClick}
-        className="flex items-center gap-1.5 px-3 py-1.5 bg-white/10 hover:bg-white/20 border border-white/20 hover:border-[#d3bc8e] rounded-full text-[10px] text-slate-200 hover:text-[#d3bc8e] transition-all whitespace-nowrap backdrop-blur-md"
+        className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-500/20 hover:bg-indigo-500/40 border border-indigo-400/30 hover:border-indigo-300 rounded-full text-[10px] text-indigo-100 hover:text-white transition-all whitespace-nowrap backdrop-blur-md shadow-lg shadow-indigo-500/20"
     >
         {icon}
         <span>{label}</span>
@@ -26,10 +26,10 @@ const QuickChip: React.FC<{ label: string; icon: React.ReactNode; onClick: () =>
 const FormattedText: React.FC<{ text: string }> = ({ text }) => {
     const parts = text.split(/(\*\*.*?\*\*)/g);
     return (
-        <span className="text-sm leading-relaxed text-slate-200">
+        <span className="text-sm leading-relaxed text-slate-100">
             {parts.map((part, i) => {
                 if (part.startsWith('**') && part.endsWith('**')) {
-                    return <span key={i} className="font-bold text-[#d3bc8e]">{part.slice(2, -2)}</span>;
+                    return <span key={i} className="font-bold text-[#ffe175] drop-shadow-sm">{part.slice(2, -2)}</span>;
                 }
                 return part;
             })}
@@ -50,13 +50,12 @@ const PaimonSidekick: React.FC<PaimonSidekickProps> = ({ userData, context }) =>
     const [isOpen, setIsOpen] = useState(false);
     
     // Draggable State
-    const [pos, setPos] = useState({ x: window.innerWidth - 100, y: window.innerHeight - 150 });
+    const [pos, setPos] = useState({ x: window.innerWidth - 90, y: window.innerHeight - 120 });
     const [isDragging, setIsDragging] = useState(false);
-    const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
     
-    // Refs to track drag distance for click distinction
-    const dragStartPos = useRef({ x: 0, y: 0 });
-    const hasMoved = useRef(false);
+    // Refs for drag calculation
+    const dragOffset = useRef({ x: 0, y: 0 });
+    const isDragGesture = useRef(false);
     
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -67,23 +66,24 @@ const PaimonSidekick: React.FC<PaimonSidekickProps> = ({ userData, context }) =>
         }
     }, [messages, loadingAi, isOpen]);
 
-    // Initialize position on mount
+    // Initialize position
     useEffect(() => {
-        setPos({ x: Math.max(20, window.innerWidth - 100), y: Math.max(20, window.innerHeight - 200) });
+        setPos({ x: Math.max(20, window.innerWidth - 90), y: Math.max(20, window.innerHeight - 120) });
     }, []);
 
-    // Drag Handlers
+    // Drag Logic
     const handleMouseDown = (e: React.MouseEvent) => {
         if (e.button !== 0) return; // Left click only
         
         setIsDragging(true);
-        hasMoved.current = false;
-        dragStartPos.current = { x: e.clientX, y: e.clientY };
+        isDragGesture.current = false;
         
-        setDragOffset({
-            x: e.clientX - pos.x,
-            y: e.clientY - pos.y
-        });
+        // Calculate offset from the top-left of the element
+        const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+        dragOffset.current = {
+            x: e.clientX - rect.left,
+            y: e.clientY - rect.top
+        };
         
         e.stopPropagation();
         e.preventDefault();
@@ -93,30 +93,20 @@ const PaimonSidekick: React.FC<PaimonSidekickProps> = ({ userData, context }) =>
         const handleMouseMove = (e: MouseEvent) => {
             if (!isDragging) return;
             
-            // Check if moved enough to consider it a drag
-            const moveDist = Math.sqrt(Math.pow(e.clientX - dragStartPos.current.x, 2) + Math.pow(e.clientY - dragStartPos.current.y, 2));
-            if (moveDist > 5) {
-                hasMoved.current = true;
-            }
-
-            const newX = e.clientX - dragOffset.x;
-            const newY = e.clientY - dragOffset.y;
+            isDragGesture.current = true; // We moved, so it's a drag
             
-            // Keep within bounds
-            const boundedX = Math.min(Math.max(0, newX), window.innerWidth - 60);
-            const boundedY = Math.min(Math.max(0, newY), window.innerHeight - 60);
+            let newX = e.clientX - dragOffset.current.x;
+            let newY = e.clientY - dragOffset.current.y;
+            
+            // Bounds check
+            newX = Math.min(Math.max(0, newX), window.innerWidth - 60);
+            newY = Math.min(Math.max(0, newY), window.innerHeight - 60);
 
-            setPos({ x: boundedX, y: boundedY });
+            setPos({ x: newX, y: newY });
         };
 
-        const handleMouseUp = (e: MouseEvent) => {
-            if (isDragging) {
-                setIsDragging(false);
-                // If we didn't move significantly, treat it as a click to toggle open
-                if (!hasMoved.current) {
-                    setIsOpen(prev => !prev);
-                }
-            }
+        const handleMouseUp = () => {
+            setIsDragging(false);
         };
 
         if (isDragging) {
@@ -128,7 +118,14 @@ const PaimonSidekick: React.FC<PaimonSidekickProps> = ({ userData, context }) =>
             window.removeEventListener('mousemove', handleMouseMove);
             window.removeEventListener('mouseup', handleMouseUp);
         };
-    }, [isDragging, dragOffset]);
+    }, [isDragging]);
+
+    const handleClick = (e: React.MouseEvent) => {
+        // Only toggle if it wasn't a drag
+        if (!isDragGesture.current) {
+            setIsOpen(!isOpen);
+        }
+    };
 
     const handleSendMessage = async (text: string) => {
         if (!text.trim() || loadingAi) return;
@@ -157,16 +154,11 @@ const PaimonSidekick: React.FC<PaimonSidekickProps> = ({ userData, context }) =>
         switch(context) {
             case 'Characters':
                 return [
-                    { label: 'Who to build?', icon: <Sparkles size={10} />, text: "Who should I build next based on my roster?" },
-                    { label: 'Team Ideas', icon: <ShieldAlert size={10} />, text: "Suggest a team for the current Spiral Abyss." },
-                ];
-            case 'Abyss':
-                return [
-                    { label: 'Abyss Tips', icon: <Zap size={10} />, text: "Analyze my Abyss performance. Why am I struggling?" },
+                    { label: 'Build Guide', icon: <Sparkles size={10} />, text: "Who should I build next based on my roster?" },
                 ];
             default: // Dashboard
                 return [
-                    { label: 'Daily Goals', icon: <Lightbulb size={10} />, text: "What should I focus on today?" },
+                    { label: 'What to do?', icon: <Lightbulb size={10} />, text: "What should I focus on today?" },
                 ];
         }
     };
@@ -176,7 +168,7 @@ const PaimonSidekick: React.FC<PaimonSidekickProps> = ({ userData, context }) =>
     // Window position
     const windowStyle: React.CSSProperties = {
         position: 'fixed',
-        left: Math.min(pos.x - 320, window.innerWidth - 360) < 0 ? 20 : Math.min(pos.x - 320, window.innerWidth - 360), 
+        left: Math.min(pos.x - 300, window.innerWidth - 350) < 0 ? 20 : Math.min(pos.x - 300, window.innerWidth - 350), 
         top: Math.min(pos.y - 400, window.innerHeight - 520) < 0 ? 20 : Math.min(pos.y - 400, window.innerHeight - 520),
         zIndex: 100,
     };
@@ -185,13 +177,21 @@ const PaimonSidekick: React.FC<PaimonSidekickProps> = ({ userData, context }) =>
         <>
             {/* Draggable Bubble Button */}
             <div 
-                style={{ left: pos.x, top: pos.y, position: 'fixed', zIndex: 101, touchAction: 'none' }}
-                // IMPORTANT: Remove transition during drag to prevent delay/lag
-                className={`group cursor-pointer ${isDragging ? 'cursor-grabbing' : 'hover:scale-110 cursor-grab transition-transform'} ${isOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
+                style={{ 
+                    left: pos.x, 
+                    top: pos.y, 
+                    position: 'fixed', 
+                    zIndex: 101, 
+                    touchAction: 'none',
+                    // Disable transition during drag for instant response
+                    transition: isDragging ? 'none' : 'transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)' 
+                }}
+                className={`group cursor-pointer ${isOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
                 onMouseDown={handleMouseDown}
+                onClick={handleClick}
             >
-                <div className="relative">
-                    <div className="w-16 h-16 rounded-full border-2 border-[#d3bc8e] bg-[#1c212e] overflow-hidden shadow-[0_0_20px_rgba(211,188,142,0.6)] relative z-10 hover:shadow-[0_0_30px_rgba(211,188,142,0.8)] transition-shadow">
+                <div className={`relative transition-transform ${isDragging ? 'scale-95' : 'group-hover:scale-110'}`}>
+                    <div className="w-16 h-16 rounded-full border-2 border-[#ffe175] bg-[#1c212e] overflow-hidden shadow-[0_0_20px_rgba(255,225,117,0.6)] relative z-10 group-hover:shadow-[0_0_30px_rgba(255,225,117,0.9)] transition-shadow">
                         <img 
                             src={PAIMON_IMG}
                             alt="Paimon" 
@@ -201,7 +201,7 @@ const PaimonSidekick: React.FC<PaimonSidekickProps> = ({ userData, context }) =>
                         />
                     </div>
                     {/* Pulsing Ring */}
-                    <div className="absolute inset-0 rounded-full border border-[#d3bc8e] animate-ping opacity-30"></div>
+                    <div className="absolute inset-0 rounded-full border border-[#ffe175] animate-ping opacity-30"></div>
                 </div>
             </div>
 
@@ -209,15 +209,12 @@ const PaimonSidekick: React.FC<PaimonSidekickProps> = ({ userData, context }) =>
             {isOpen && (
                 <div 
                     style={windowStyle}
-                    className="w-[340px] flex flex-col bg-[#131720]/90 backdrop-blur-2xl border border-white/20 rounded-3xl shadow-[0_20px_60px_rgba(0,0,0,0.8)] overflow-hidden animate-fade-in"
+                    className="w-[340px] flex flex-col bg-[#0c0f16]/95 backdrop-blur-2xl border border-[#ffe175]/20 rounded-3xl shadow-[0_20px_60px_rgba(0,0,0,0.9)] overflow-hidden animate-fade-in ring-1 ring-[#ffe175]/10"
                 >
-                    {/* Draggable Header */}
-                    <div 
-                        className="h-14 bg-gradient-to-r from-[#1c212e] to-[#131720] border-b border-white/10 flex items-center justify-between px-4 cursor-move"
-                        onMouseDown={handleMouseDown}
-                    >
-                         <div className="flex items-center gap-3 select-none pointer-events-none">
-                             <div className="w-9 h-9 rounded-full border border-[#d3bc8e]/50 bg-[#1c212e] overflow-hidden shadow-lg">
+                    {/* Header - Now also draggable to move the window if needed (requires separate logic, but for now serves as close bar) */}
+                    <div className="h-14 bg-gradient-to-r from-[#1c212e] to-[#0c0f16] border-b border-white/10 flex items-center justify-between px-4 select-none">
+                         <div className="flex items-center gap-3">
+                             <div className="w-9 h-9 rounded-full border border-[#ffe175]/50 bg-[#1c212e] overflow-hidden shadow-lg">
                                  <img 
                                     src={PAIMON_IMG}
                                     alt="Paimon" 
@@ -225,15 +222,17 @@ const PaimonSidekick: React.FC<PaimonSidekickProps> = ({ userData, context }) =>
                                 />
                              </div>
                              <div>
-                                 <span className="font-serif font-bold text-[#d3bc8e] block leading-none">Paimon</span>
-                                 <span className="text-[10px] text-slate-400 uppercase tracking-widest">AI Companion</span>
+                                 <span className="font-serif font-bold text-[#ffe175] block leading-none drop-shadow-md">Paimon</span>
+                                 <span className="text-[9px] text-slate-400 uppercase tracking-widest font-bold">Emergency Food</span>
                              </div>
                          </div>
                          <div className="flex items-center gap-2">
-                             <GripHorizontal size={16} className="text-slate-600" />
+                             <div className="cursor-move p-1 text-slate-600" onMouseDown={handleMouseDown} title="Drag to move">
+                                <GripHorizontal size={16} />
+                             </div>
                              <button 
-                                onClick={(e) => { e.stopPropagation(); setIsOpen(false); }}
-                                className="w-7 h-7 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-slate-400 hover:text-white transition-colors"
+                                onClick={() => setIsOpen(false)}
+                                className="w-7 h-7 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-slate-400 hover:text-white transition-colors border border-white/5 hover:border-white/20"
                              >
                                 <X size={16} />
                              </button>
@@ -243,25 +242,25 @@ const PaimonSidekick: React.FC<PaimonSidekickProps> = ({ userData, context }) =>
                     {/* Messages */}
                     <div 
                         ref={scrollContainerRef}
-                        className="h-[400px] overflow-y-auto p-4 space-y-3 scrollbar-thin bg-gradient-to-b from-[#0c0f16]/60 to-[#131720]/60"
+                        className="h-[400px] overflow-y-auto p-4 space-y-4 scrollbar-thin bg-gradient-to-b from-[#0c0f16]/80 to-[#131720]/80"
                     >
                          {messages.length === 0 && (
                             <div className="h-full flex flex-col items-center justify-center text-center opacity-70">
-                                <Sparkles className="text-[#d3bc8e] mb-3 animate-bounce" size={24} />
-                                <p className="text-sm text-slate-300 font-medium">"Paimon is listening!"</p>
-                                <p className="text-xs text-slate-500 mt-1">Ask me anything about your adventure.</p>
+                                <Sparkles className="text-[#ffe175] mb-3 animate-bounce" size={32} />
+                                <p className="text-sm text-slate-200 font-bold">"Paimon is listening!"</p>
+                                <p className="text-xs text-slate-500 mt-1 max-w-[200px]">Ask Paimon about your artifacts, abyss teams, or where to find chests!</p>
                             </div>
                          )}
 
                          {messages.map((msg, i) => (
-                            <div key={i} className={`flex gap-2 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                            <div key={i} className={`flex gap-3 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                                 {msg.role !== 'user' && (
-                                    <Bot size={16} className="text-[#d3bc8e] mt-2 shrink-0" />
+                                    <Bot size={24} className="text-[#ffe175] mt-1 shrink-0 drop-shadow-[0_0_10px_rgba(255,225,117,0.5)]" />
                                 )}
-                                <div className={`max-w-[85%] rounded-2xl p-3 text-sm shadow-sm ${
+                                <div className={`max-w-[85%] rounded-2xl p-3.5 text-sm shadow-md ${
                                     msg.role === 'user' 
-                                    ? 'bg-gradient-to-br from-[#d3bc8e] to-[#c2aa7c] text-[#0c0f16] font-semibold rounded-tr-none' 
-                                    : 'bg-[#1c212e] border border-white/10 text-slate-200 rounded-tl-none'
+                                    ? 'bg-gradient-to-br from-[#ffe175] to-[#c2aa7c] text-[#0c0f16] font-bold rounded-tr-none' 
+                                    : 'bg-[#1e2330] border border-white/10 text-slate-200 rounded-tl-none'
                                 }`}>
                                     {msg.role === 'user' ? msg.text : <FormattedText text={msg.text} />}
                                 </div>
@@ -269,13 +268,13 @@ const PaimonSidekick: React.FC<PaimonSidekickProps> = ({ userData, context }) =>
                          ))}
 
                          {loadingAi && (
-                             <div className="flex gap-2">
-                                 <Bot size={16} className="text-[#d3bc8e] mt-2 shrink-0" />
-                                 <div className="bg-[#1c212e] border border-white/10 rounded-2xl rounded-tl-none p-3 shadow-sm">
+                             <div className="flex gap-3">
+                                 <Bot size={24} className="text-[#ffe175] mt-1 shrink-0" />
+                                 <div className="bg-[#1e2330] border border-white/10 rounded-2xl rounded-tl-none p-4 shadow-sm">
                                      <div className="flex gap-1.5">
-                                         <div className="w-1.5 h-1.5 bg-[#d3bc8e] rounded-full animate-bounce"></div>
-                                         <div className="w-1.5 h-1.5 bg-[#d3bc8e] rounded-full animate-bounce delay-100"></div>
-                                         <div className="w-1.5 h-1.5 bg-[#d3bc8e] rounded-full animate-bounce delay-200"></div>
+                                         <div className="w-2 h-2 bg-[#ffe175] rounded-full animate-bounce"></div>
+                                         <div className="w-2 h-2 bg-[#ffe175] rounded-full animate-bounce delay-100"></div>
+                                         <div className="w-2 h-2 bg-[#ffe175] rounded-full animate-bounce delay-200"></div>
                                      </div>
                                  </div>
                              </div>
@@ -284,7 +283,7 @@ const PaimonSidekick: React.FC<PaimonSidekickProps> = ({ userData, context }) =>
                     </div>
 
                     {/* Input */}
-                    <div className="p-3 bg-[#131720] border-t border-white/10">
+                    <div className="p-3 bg-[#131720] border-t border-white/10 backdrop-blur-md">
                         <div className="flex gap-2 mb-3 overflow-x-auto no-scrollbar">
                             {getChips().map((chip, idx) => (
                                 <QuickChip 
@@ -302,12 +301,12 @@ const PaimonSidekick: React.FC<PaimonSidekickProps> = ({ userData, context }) =>
                                 onChange={(e) => setInput(e.target.value)}
                                 placeholder="Message Paimon..."
                                 disabled={loadingAi}
-                                className="w-full bg-[#0c0f16] border border-white/10 rounded-xl pl-4 pr-10 py-3 text-sm text-white focus:outline-none focus:border-[#d3bc8e]/50 focus:ring-1 focus:ring-[#d3bc8e]/20 transition-all placeholder:text-slate-600 shadow-inner"
+                                className="w-full bg-[#080a0f] border border-white/10 rounded-xl pl-4 pr-10 py-3 text-sm text-white focus:outline-none focus:border-[#ffe175]/50 focus:ring-1 focus:ring-[#ffe175]/20 transition-all placeholder:text-slate-600 shadow-inner"
                             />
                             <button 
                                 type="submit"
                                 disabled={!input.trim() || loadingAi}
-                                className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-slate-400 hover:text-[#d3bc8e] disabled:opacity-50 transition-colors"
+                                className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-slate-400 hover:text-[#ffe175] disabled:opacity-50 transition-colors"
                             >
                                 <Send size={16} />
                             </button>
