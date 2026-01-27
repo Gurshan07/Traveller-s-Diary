@@ -8,6 +8,9 @@ interface DashboardProps {
   data: UserData;
 }
 
+// Define local asset path manually to avoid ESM import errors
+const paimonAvatar = '/assets/paimon.png';
+
 // Stat Node Component for the "Constellation" grid
 const StatNode: React.FC<{ 
     label: string; 
@@ -120,7 +123,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data }) => {
                            <div className="w-20 h-20 md:w-24 md:h-24 rounded-full p-0.5 bg-gradient-to-br from-sky-400 to-indigo-500 shadow-[0_0_20px_rgba(56,189,248,0.5)]">
                                <div className="w-full h-full rounded-full border-4 border-[#080a0f] bg-[#1c212e] overflow-hidden">
                                    <img 
-                                      src={data.profileIcon || "https://github.com/shadcn.png"} 
+                                      src={data.profileIcon || paimonAvatar} 
                                       className="w-full h-full object-cover" 
                                       alt="Traveler"
                                       referrerPolicy="no-referrer"

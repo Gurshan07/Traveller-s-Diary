@@ -4,17 +4,14 @@ import { useChat } from '../contexts/ChatContext';
 import { sendMessageToPaimon } from '../services/ai';
 import { Send, Bot, Sparkles, X, GripHorizontal, Lightbulb, Ghost } from 'lucide-react';
 import { UserData } from '../types';
-// Importing local asset as requested
-// Note: Ensure 'paimon.png' exists in 'src/assets/'
-import paimonLocal from '../assets/paimon.png';
 
 interface PaimonSidekickProps {
     userData: UserData;
     context: string; 
 }
 
-// Use the local import
-const PAIMON_DEFAULT = paimonLocal;
+// Use static path to avoid module resolution errors with image imports
+const PAIMON_DEFAULT = '/assets/paimon.png';
 
 const QuickChip: React.FC<{ label: string; icon: React.ReactNode; onClick: () => void }> = ({ label, icon, onClick }) => (
     <button 
