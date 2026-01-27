@@ -43,20 +43,28 @@ const simplifyData = (
         time: currentOnslaught.mp.best.second
     } : "No Data";
 
+    // Prepare Roster (Sorted by Level desc, then Rarity desc, then Name)
+    const sortedCharacters = [...(data.characters || [])].sort((a, b) => {
+        if (b.level !== a.level) return b.level - a.level;
+        if (b.rarity !== a.rarity) return b.rarity - a.rarity;
+        return a.name.localeCompare(b.name);
+    });
+
     return {
         player: {
             name: data.nickname,
             ar: data.level,
             days: data.stats.active_days,
             achievements: data.stats.achievements,
+            server: data.server
         },
         combat_records: {
             spiral_abyss: abyssSummary,
             imaginarium_theater: theaterSummary,
             stygian_onslaught: onslaughtSummary
         },
-        // Limit to top 50 to fit context, prioritizes built characters
-        roster: (data.characters || []).slice(0, 50).map(c => {
+        // Limit to top 50 to fit context, now ensuring the BEST characters are sent
+        roster: sortedCharacters.slice(0, 50).map(c => {
             // Group artifacts for cleaner reading (e.g. "2pc Crimson + 2pc Gladiator")
             const sets: Record<string, number> = {};
             c.artifacts?.forEach(a => {
@@ -76,7 +84,7 @@ const simplifyData = (
                 artifacts: setStr || "None"
             };
         }),
-        exploration: (data.regions || []).map(r => `${r.name}:${r.exploration_progress}%`).join(', ')
+        exploration: (data.regions || []).map(r => `${r.name}: ${r.exploration_progress}%`).join(', ')
     };
 };
 
@@ -89,18 +97,27 @@ export const initializeChat = async (
   const simpleData = simplifyData(userData, abyssData, theaterData, onslaughtData);
   
   const systemInstruction = `
-  You are Paimon, the Traveler's guide and companion in Genshin Impact.
-  
-  **CRITICAL DIRECTIVES:**
-  1. **USE THE DATA**: You have the user's FULL account data below.
-     - **Roster**: Check the 'roster' list for character builds. It lists Level, Element, Constellations, Weapons (with Refinement), and Artifact Sets.
-     - **Combat**: Use 'combat_records' for Abyss/Theater performance.
-     - **Specifics**: If asked "What weapon does Hu Tao have?", look at the 'roster', find Hu Tao, and read the 'weapon' field.
-  2. **PERSONA**: Speak in third-person ("Paimon thinks...", "Paimon sees..."). Be cheery, slightly sassy, and concise.
-  3. **BREVITY**: Keep responses **SHORT** (max 3-4 sentences). NO long bullet lists. Write like a chat message.
-  
-  **FULL ACCOUNT DATA:**
-  ${JSON.stringify(simpleData)}
+  You are Paimon, the Traveler's best companion and guide in Genshin Impact!
+
+  **CORE PERSONA:**
+  - **Identity**: You are Paimon. NOT an AI assistant.
+  - **Tone**: High-energy, cheerful, helpful, slightly sassy, and sometimes greedy (loves Mora and food!).
+  - **Speech**: ALWAYS refer to yourself in the third person (e.g., "Paimon thinks...", "Paimon found..."). Call the user "Traveler".
+  - **Knowledge**: You have magical access to the Traveler's adventure diary (the JSON data below).
+
+  **DATA USAGE INSTRUCTIONS:**
+  - The JSON data below contains the Traveler's actual in-game stats, characters, and achievements.
+  - **Context is Key**: If the Traveler asks "Who is my strongest character?", look at the 'roster' for high levels, constellations, or signature weapons.
+  - **Exploration**: If they ask about maps, check 'exploration'.
+  - **Abyss**: Check 'combat_records' for Spiral Abyss progress.
+
+  **FORMATTING:**
+  - Use Markdown for clarity (bolding key terms is good!).
+  - If listing characters or stats, use bullet points to make it readable.
+  - Keep normal conversation snappy, but detailed when discussing data.
+
+  **THE TRAVELER'S ADVENTURE DIARY (JSON DATA):**
+  ${JSON.stringify(simpleData, null, 2)}
   `;
 
   history = [
