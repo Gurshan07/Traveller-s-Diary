@@ -9,7 +9,7 @@ interface CharactersPageProps {
   data: UserData;
 }
 
-// --- Character Modal Component (Unchanged logic, just ensure z-index is high) ---
+// --- Character Modal Component ---
 
 const CharacterDetailModal: React.FC<{ 
     character: Character; 
@@ -35,18 +35,20 @@ const CharacterDetailModal: React.FC<{
         loadDetail();
     }, [character.id, userData]);
 
-    const stopProp = (e: React.MouseEvent) => e.stopPropagation();
     const displayImage = detail?.base.image || character.image;
 
     return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/90 backdrop-blur-md animate-fade-in" onClick={onClose}>
+        <div 
+            className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/90 backdrop-blur-md animate-fade-in cursor-pointer" 
+            onClick={onClose}
+        >
             <div 
-                className="bg-[#131720] border border-white/20 w-full max-w-5xl h-[85vh] rounded-3xl overflow-hidden flex flex-col md:flex-row relative shadow-[0_0_50px_rgba(0,0,0,0.8)]"
-                onClick={stopProp}
+                className="bg-[#131720] border border-white/20 w-full max-w-5xl h-[85vh] rounded-3xl overflow-hidden flex flex-col md:flex-row relative shadow-[0_0_50px_rgba(0,0,0,0.8)] cursor-default"
+                onClick={(e) => e.stopPropagation()} 
             >
                 <button 
                     onClick={onClose}
-                    className="absolute top-4 right-4 z-20 w-10 h-10 bg-black/40 hover:bg-black/60 rounded-full flex items-center justify-center text-white border border-white/10 transition-colors"
+                    className="absolute top-4 right-4 z-20 w-10 h-10 bg-black/40 hover:bg-black/60 rounded-full flex items-center justify-center text-white border border-white/10 transition-colors cursor-pointer"
                 >
                     <X size={20} />
                 </button>
@@ -87,7 +89,7 @@ const CharacterDetailModal: React.FC<{
                             <button
                                 key={tab}
                                 onClick={() => setActiveTab(tab as any)}
-                                className={`pb-4 text-sm font-bold uppercase tracking-widest border-b-2 transition-colors whitespace-nowrap ${
+                                className={`pb-4 text-sm font-bold uppercase tracking-widest border-b-2 transition-colors whitespace-nowrap cursor-pointer ${
                                     activeTab === tab 
                                     ? 'text-[#ffe175] border-[#ffe175]' 
                                     : 'text-slate-500 border-transparent hover:text-slate-300'

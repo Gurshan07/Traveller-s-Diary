@@ -74,7 +74,7 @@ const ChallengeCard: React.FC<{ stage: HardChallengeStage }> = ({ stage }) => {
                          {/* Team Details */}
                          <div className="flex-1">
                             <h4 className="text-xs font-bold uppercase text-slate-500 dark:text-slate-400 mb-2 flex items-center gap-1.5">
-                                 <Sword size={14} /> Team Roster
+                                 <Sword size={14} /> Team Characters
                              </h4>
                              <div className="grid grid-cols-2 gap-2">
                                  {stage.teams.map((char) => (

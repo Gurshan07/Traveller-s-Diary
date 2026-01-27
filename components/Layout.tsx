@@ -73,7 +73,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
   const navItems = [
     { path: '/', label: 'Summary', icon: <LayoutDashboard size={20} /> },
-    { path: '/characters', label: 'Roster', icon: <Users size={20} /> },
+    { path: '/characters', label: 'Characters', icon: <Users size={20} /> },
     { path: '/abyss', label: 'Abyss', icon: <Swords size={20} /> },
     { path: '/theater', label: 'Theater', icon: <Drama size={20} /> },
     { path: '/onslaught', label: 'Onslaught', icon: <Zap size={20} /> },

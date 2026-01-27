@@ -2,7 +2,7 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { useChat } from '../contexts/ChatContext';
 import { sendMessageToPaimon } from '../services/ai';
-import { Send, Bot, Sparkles, X, GripHorizontal, Lightbulb } from 'lucide-react';
+import { Send, Bot, Sparkles, X, GripHorizontal, Lightbulb, Ghost } from 'lucide-react';
 import { UserData } from '../types';
 
 interface PaimonSidekickProps {
@@ -10,8 +10,8 @@ interface PaimonSidekickProps {
     context: string; 
 }
 
-// Reliable Paimon Source (Wiki)
-const PAIMON_IMG = "https://static.wikia.nocookie.net/gensin-impact/images/8/80/Paimon_Icon.png";
+// Reliable Paimon Source (GitHub Raw)
+const PAIMON_DEFAULT = "https://github.com/MadeBaruna/paimon-moe/blob/main/static/images/paimon.png?raw=true";
 
 const QuickChip: React.FC<{ label: string; icon: React.ReactNode; onClick: () => void }> = ({ label, icon, onClick }) => (
     <button 
@@ -48,6 +48,8 @@ const PaimonSidekick: React.FC<PaimonSidekickProps> = ({ userData, context }) =>
     
     const [input, setInput] = useState('');
     const [isOpen, setIsOpen] = useState(false);
+    const [imgSrc, setImgSrc] = useState(PAIMON_DEFAULT);
+    const [imgError, setImgError] = useState(false);
     
     // Draggable State
     const [pos, setPos] = useState({ x: window.innerWidth - 90, y: window.innerHeight - 120 });
@@ -154,7 +156,7 @@ const PaimonSidekick: React.FC<PaimonSidekickProps> = ({ userData, context }) =>
         switch(context) {
             case 'Characters':
                 return [
-                    { label: 'Build Guide', icon: <Sparkles size={10} />, text: "Who should I build next based on my roster?" },
+                    { label: 'Build Guide', icon: <Sparkles size={10} />, text: "Who should I build next based on my characters?" },
                 ];
             default: // Dashboard
                 return [
@@ -191,14 +193,19 @@ const PaimonSidekick: React.FC<PaimonSidekickProps> = ({ userData, context }) =>
                 onClick={handleClick}
             >
                 <div className={`relative transition-transform ${isDragging ? 'scale-95' : 'group-hover:scale-110'}`}>
-                    <div className="w-16 h-16 rounded-full border-2 border-[#ffe175] bg-[#1c212e] overflow-hidden shadow-[0_0_20px_rgba(255,225,117,0.6)] relative z-10 group-hover:shadow-[0_0_30px_rgba(255,225,117,0.9)] transition-shadow">
-                        <img 
-                            src={PAIMON_IMG}
-                            alt="Paimon" 
-                            className="w-full h-full object-cover scale-110" 
-                            referrerPolicy="no-referrer"
-                            draggable={false}
-                        />
+                    <div className="w-16 h-16 rounded-full border-2 border-[#ffe175] bg-[#1c212e] overflow-hidden shadow-[0_0_20px_rgba(255,225,117,0.6)] relative z-10 group-hover:shadow-[0_0_30px_rgba(255,225,117,0.9)] transition-shadow flex items-center justify-center">
+                        {!imgError ? (
+                            <img 
+                                src={imgSrc}
+                                alt="Paimon" 
+                                className="w-full h-full object-cover scale-110" 
+                                referrerPolicy="no-referrer"
+                                draggable={false}
+                                onError={() => setImgError(true)}
+                            />
+                        ) : (
+                            <Ghost className="text-[#ffe175]" size={32} />
+                        )}
                     </div>
                     {/* Pulsing Ring */}
                     <div className="absolute inset-0 rounded-full border border-[#ffe175] animate-ping opacity-30"></div>
@@ -214,12 +221,17 @@ const PaimonSidekick: React.FC<PaimonSidekickProps> = ({ userData, context }) =>
                     {/* Header */}
                     <div className="h-14 bg-gradient-to-r from-[#1c212e] to-[#0c0f16] border-b border-white/10 flex items-center justify-between px-4 select-none">
                          <div className="flex items-center gap-3">
-                             <div className="w-9 h-9 rounded-full border border-[#ffe175]/50 bg-[#1c212e] overflow-hidden shadow-lg">
-                                 <img 
-                                    src={PAIMON_IMG}
-                                    alt="Paimon" 
-                                    className="w-full h-full object-cover scale-110" 
-                                />
+                             <div className="w-9 h-9 rounded-full border border-[#ffe175]/50 bg-[#1c212e] overflow-hidden shadow-lg flex items-center justify-center">
+                                 {!imgError ? (
+                                    <img 
+                                        src={imgSrc}
+                                        alt="Paimon" 
+                                        className="w-full h-full object-cover scale-110" 
+                                        onError={() => setImgError(true)}
+                                    />
+                                 ) : (
+                                    <Ghost className="text-[#ffe175]" size={16} />
+                                 )}
                              </div>
                              <div>
                                  <span className="font-serif font-bold text-[#ffe175] block leading-none drop-shadow-md">Paimon</span>
