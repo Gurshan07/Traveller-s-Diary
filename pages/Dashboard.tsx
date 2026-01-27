@@ -22,20 +22,20 @@ const ElementBadge: React.FC<{ element: string }> = ({ element }) => {
     if (!icon) return <span>{element}</span>;
 
     const colors: Record<string, string> = {
-        Pyro: 'text-[#ff9999] bg-[#ff9999]/10 border-[#ff9999]/20',
-        Hydro: 'text-[#80c0ff] bg-[#80c0ff]/10 border-[#80c0ff]/20',
-        Anemo: 'text-[#80ffd7] bg-[#80ffd7]/10 border-[#80ffd7]/20',
-        Electro: 'text-[#ffacff] bg-[#ffacff]/10 border-[#ffacff]/20',
-        Dendro: 'text-[#a5c83b] bg-[#a5c83b]/10 border-[#a5c83b]/20',
-        Cryo: 'text-[#99ffff] bg-[#99ffff]/10 border-[#99ffff]/20',
-        Geo: 'text-[#ffe699] bg-[#ffe699]/10 border-[#ffe699]/20',
+        Pyro: 'text-[#ff9999] bg-[#3d1a1a] border-[#ff9999]/30',
+        Hydro: 'text-[#80c0ff] bg-[#1a2a3d] border-[#80c0ff]/30',
+        Anemo: 'text-[#80ffd7] bg-[#1a3d32] border-[#80ffd7]/30',
+        Electro: 'text-[#ffacff] bg-[#3d1a3d] border-[#ffacff]/30',
+        Dendro: 'text-[#a5c83b] bg-[#2a3d1a] border-[#a5c83b]/30',
+        Cryo: 'text-[#99ffff] bg-[#1a3d3d] border-[#99ffff]/30',
+        Geo: 'text-[#ffe699] bg-[#3d361a] border-[#ffe699]/30',
     };
 
-    const styleClass = colors[element] || 'text-slate-200 bg-slate-700/50';
+    const styleClass = colors[element] || 'text-slate-200 bg-slate-700/50 border-slate-600';
 
     return (
-        <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md border text-xs font-bold align-middle mx-1 select-none ${styleClass}`}>
-            <span className="w-3.5 h-3.5 flex-shrink-0 drop-shadow-sm">
+        <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full border text-[11px] uppercase tracking-wide font-bold align-middle mx-1 select-none shadow-sm ${styleClass}`}>
+            <span className="w-3 h-3 flex-shrink-0 drop-shadow-sm">
                 {icon}
             </span>
             <span>{element}</span>
