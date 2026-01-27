@@ -11,6 +11,76 @@ interface DashboardProps {
   data: UserData;
 }
 
+// --- Rich Text Rendering Components ---
+
+const InlineText: React.FC<{ text: string }> = ({ text }) => {
+    // 1. Split by Bold (**text**)
+    const boldParts = text.split(/(\*\*.*?\*\*)/g);
+    
+    return (
+        <>
+            {boldParts.map((part, i) => {
+                if (part.startsWith('**') && part.endsWith('**')) {
+                    // Bold content: Render gold/bold
+                    return <span key={i} className="font-bold text-[#ffd780] drop-shadow-sm">{part.slice(2, -2)}</span>;
+                } else {
+                    // Normal text: Highlight Elements automatically
+                    const elementParts = part.split(/(Pyro|Hydro|Anemo|Electro|Dendro|Cryo|Geo)/g);
+                    return elementParts.map((subPart, j) => {
+                         const key = `${i}-${j}`;
+                         switch(subPart) {
+                             case 'Pyro': return <span key={key} className="text-[#ff9999] font-medium">Pyro</span>;
+                             case 'Hydro': return <span key={key} className="text-[#80c0ff] font-medium">Hydro</span>;
+                             case 'Anemo': return <span key={key} className="text-[#80ffd7] font-medium">Anemo</span>;
+                             case 'Electro': return <span key={key} className="text-[#ffacff] font-medium">Electro</span>;
+                             case 'Dendro': return <span key={key} className="text-[#a5c83b] font-medium">Dendro</span>;
+                             case 'Cryo': return <span key={key} className="text-[#99ffff] font-medium">Cryo</span>;
+                             case 'Geo': return <span key={key} className="text-[#ffe699] font-medium">Geo</span>;
+                             default: return <span key={key}>{subPart}</span>;
+                         }
+                    });
+                }
+            })}
+        </>
+    )
+};
+
+const FormattedMessage: React.FC<{ text: string }> = ({ text }) => {
+    const lines = text.split('\n');
+    
+    return (
+        <div className="space-y-1.5 font-sans">
+            {lines.map((line, i) => {
+                const trimmed = line.trim();
+                if (!trimmed) return <div key={i} className="h-2" />;
+
+                // Handle Lists
+                if (trimmed.startsWith('- ') || trimmed.startsWith('* ')) {
+                    const content = trimmed.substring(2);
+                    return (
+                        <div key={i} className="flex gap-2 ml-1">
+                            <div className="w-1.5 h-1.5 rounded-full bg-[#d3bc8e] mt-2 shrink-0 opacity-80" />
+                            <p className="text-sm leading-relaxed text-slate-200"><InlineText text={content} /></p>
+                        </div>
+                    );
+                }
+                
+                // Handle Headers
+                if (trimmed.startsWith('## ')) {
+                     return <h3 key={i} className="text-base font-bold text-[#d3bc8e] mt-3 mb-1"><InlineText text={trimmed.substring(3)} /></h3>
+                }
+
+                // Standard Paragraph
+                return (
+                    <p key={i} className="text-sm leading-relaxed text-slate-200">
+                        <InlineText text={line} />
+                    </p>
+                );
+            })}
+        </div>
+    );
+};
+
 const SummaryStat: React.FC<{ label: string; value: string | number; subLabel?: string }> = ({ label, value, subLabel }) => (
     <div className="flex flex-col items-center justify-center p-2 text-center group cursor-default">
         <span className="text-2xl lg:text-3xl font-bold text-slate-200 group-hover:text-white transition-colors">{value}</span>
@@ -107,7 +177,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data }) => {
             // Initialize AI with FULL Context if needed
             if (needsAiInit) {
                 await initializeChat(data, aData, tData, oData);
-                addMessage({ role: 'model', text: "Paimon has finished reading your travel diary! I know about your Abyss runs and Theater stats now! What should we discuss?" });
+                addMessage({ role: 'model', text: "Paimon has finished reading your travel diary! I know about your **Abyss** runs and **Theater** stats now! What should we discuss?" });
                 setChatUid(data.uid);
                 setIsAiLoadingContext(false);
             }
@@ -374,12 +444,16 @@ const Dashboard: React.FC<DashboardProps> = ({ data }) => {
                                 />
                            </div>
                        ) : null}
-                       <div className={`max-w-[80%] rounded-2xl p-3 text-sm leading-relaxed shadow-sm ${
+                       <div className={`max-w-[85%] rounded-2xl p-3 shadow-sm ${
                            msg.role === 'user' 
                            ? 'bg-[#4e6c8e] text-white rounded-tr-none' 
                            : 'bg-white/10 text-slate-200 rounded-tl-none border border-white/5'
                        }`}>
-                           <p className="whitespace-pre-wrap">{msg.text}</p>
+                           {msg.role === 'user' ? (
+                               <p className="whitespace-pre-wrap text-sm leading-relaxed">{msg.text}</p>
+                           ) : (
+                               <FormattedMessage text={msg.text} />
+                           )}
                        </div>
                        {msg.role === 'user' && (
                            <div className="w-8 h-8 rounded-full bg-slate-700 border border-white/10 overflow-hidden shrink-0 mt-1 shadow-sm">
