@@ -167,13 +167,22 @@ const PaimonSidekick: React.FC<PaimonSidekickProps> = ({ userData, context }) =>
 
     if (!chatUid) return null;
 
-    // Window position
-    const windowStyle: React.CSSProperties = {
-        position: 'fixed',
-        left: Math.min(pos.x - 300, window.innerWidth - 350) < 0 ? 20 : Math.min(pos.x - 300, window.innerWidth - 350), 
-        top: Math.min(pos.y - 400, window.innerHeight - 520) < 0 ? 20 : Math.min(pos.y - 400, window.innerHeight - 520),
-        zIndex: 100,
-    };
+    // Window position logic for responsive screens
+    const isMobile = window.innerWidth < 640;
+    const windowStyle: React.CSSProperties = isMobile 
+        ? {
+            position: 'fixed',
+            bottom: '80px',
+            right: '20px',
+            zIndex: 100,
+            maxWidth: 'calc(100vw - 40px)',
+        } 
+        : {
+            position: 'fixed',
+            left: Math.min(pos.x - 300, window.innerWidth - 350) < 0 ? 20 : Math.min(pos.x - 300, window.innerWidth - 350), 
+            top: Math.min(pos.y - 400, window.innerHeight - 520) < 0 ? 20 : Math.min(pos.y - 400, window.innerHeight - 520),
+            zIndex: 100,
+        };
     
     return (
         <>
@@ -216,7 +225,7 @@ const PaimonSidekick: React.FC<PaimonSidekickProps> = ({ userData, context }) =>
             {isOpen && (
                 <div 
                     style={windowStyle}
-                    className="w-[340px] flex flex-col bg-[#0c0f16]/95 backdrop-blur-2xl border border-[#ffe175]/20 rounded-3xl shadow-[0_20px_60px_rgba(0,0,0,0.9)] overflow-hidden animate-fade-in ring-1 ring-[#ffe175]/10"
+                    className="w-full sm:w-[340px] flex flex-col bg-[#0c0f16]/95 backdrop-blur-2xl border border-[#ffe175]/20 rounded-3xl shadow-[0_20px_60px_rgba(0,0,0,0.9)] overflow-hidden animate-fade-in ring-1 ring-[#ffe175]/10"
                 >
                     {/* Header */}
                     <div className="h-14 bg-gradient-to-r from-[#1c212e] to-[#0c0f16] border-b border-white/10 flex items-center justify-between px-4 select-none">
@@ -239,7 +248,7 @@ const PaimonSidekick: React.FC<PaimonSidekickProps> = ({ userData, context }) =>
                              </div>
                          </div>
                          <div className="flex items-center gap-2">
-                             <div className="cursor-move p-1 text-slate-600" onMouseDown={handleMouseDown} title="Drag to move">
+                             <div className="cursor-move p-1 text-slate-600 hidden sm:block" onMouseDown={handleMouseDown} title="Drag to move">
                                 <GripHorizontal size={16} />
                              </div>
                              <button 

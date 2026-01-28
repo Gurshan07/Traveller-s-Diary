@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { UserData } from '../types';
@@ -49,33 +50,33 @@ const RegionDetailPage: React.FC<RegionDetailPageProps> = ({ data }) => {
             />
             <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/20 to-transparent"></div>
             
-            <div className="absolute bottom-0 left-0 p-8 w-full">
+            <div className="absolute bottom-0 left-0 p-6 md:p-8 w-full">
                 <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
                     <div className="flex items-center gap-4">
                         <div className={`p-3 rounded-2xl ${ELEMENT_COLORS[region.element]} bg-white/10 backdrop-blur-md border border-white/20 shadow-lg`}>
                             {React.cloneElement(ELEMENT_ICONS[region.element] as React.ReactElement<any>, { size: 32, className: "w-8 h-8" })}
                         </div>
                         <div>
-                            <h1 className="text-4xl md:text-5xl font-black text-white tracking-wide drop-shadow-lg mb-2">{region.name}</h1>
-                            <div className="flex items-center gap-4 text-white/90">
+                            <h1 className="text-3xl md:text-5xl font-black text-white tracking-wide drop-shadow-lg mb-2">{region.name}</h1>
+                            <div className="flex flex-wrap items-center gap-2 md:gap-4 text-white/90">
                                 {region.reputation_level > 0 && (
                                     <div className="flex items-center gap-1.5 bg-black/30 px-3 py-1 rounded-full backdrop-blur-sm border border-white/10">
                                         <Crown size={14} className="text-yellow-400" />
-                                        <span className="text-sm font-bold">Reputation Lv. {region.reputation_level}</span>
+                                        <span className="text-xs md:text-sm font-bold">Reputation Lv. {region.reputation_level}</span>
                                     </div>
                                 )}
                                 {region.statue_level > 0 && (
                                     <div className="flex items-center gap-1.5 bg-black/30 px-3 py-1 rounded-full backdrop-blur-sm border border-white/10">
                                         <Landmark size={14} className="text-blue-400" />
-                                        <span className="text-sm font-bold">Statue Lv. {region.statue_level}</span>
+                                        <span className="text-xs md:text-sm font-bold">Statue Lv. {region.statue_level}</span>
                                     </div>
                                 )}
                             </div>
                         </div>
                     </div>
-                    <div className="text-right">
-                         <p className="text-slate-300 text-sm font-medium mb-1">Total Exploration</p>
-                         <div className="text-5xl font-bold text-white tracking-tighter drop-shadow-md">
+                    <div className="text-left md:text-right pl-16 md:pl-0">
+                         <p className="text-slate-300 text-xs md:text-sm font-medium mb-1">Total Exploration</p>
+                         <div className="text-4xl md:text-5xl font-bold text-white tracking-tighter drop-shadow-md">
                              {region.exploration_progress}%
                          </div>
                     </div>

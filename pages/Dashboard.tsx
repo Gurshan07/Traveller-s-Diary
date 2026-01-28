@@ -2,7 +2,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { UserData } from '../types';
-import { Swords, Map, User, Trophy, Calendar, Sparkles, Compass, Star, ChevronRight, Scroll, Clock } from 'lucide-react';
+import { Swords, Map, User, Trophy, Calendar, Sparkles, Compass, Star, ChevronRight, Scroll, Clock, Copy } from 'lucide-react';
 
 interface DashboardProps {
   data: UserData;
@@ -99,60 +99,66 @@ const Dashboard: React.FC<DashboardProps> = ({ data }) => {
   return (
     <div className="space-y-6 animate-fade-in pb-12">
         
-        {/* --- ZONE 1: COMPACT HERO SECTION --- */}
-        <div className="relative rounded-[2rem] overflow-hidden h-[260px] flex items-end p-8 group border border-white/5 shadow-2xl">
-             {/* Background Image - Using a reliable Picsum image with specific ID for consistency */}
-             <div className="absolute inset-0 bg-[#080a0f]">
+        {/* --- ZONE 1: PROFILE NAMECARD HERO --- */}
+        <div className="relative rounded-3xl overflow-hidden min-h-[280px] h-auto shadow-[0_10px_40px_rgba(0,0,0,0.5)] border border-white/10 group">
+             {/* Namecard Background */}
+             <div className="absolute inset-0 bg-[#1c212e]">
                  <img 
                     src="https://picsum.photos/id/1042/1200/600" 
-                    className="absolute inset-0 w-full h-full object-cover opacity-30 mix-blend-luminosity group-hover:scale-105 transition-transform duration-[20s]"
-                    alt="Background"
+                    className="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-[20s]"
+                    alt="Namecard"
                  />
-                 {/* Vivid Gradients */}
-                 <div className="absolute inset-0 bg-gradient-to-t from-[#080a0f] via-[#080a0f]/60 to-transparent"></div>
-                 <div className="absolute inset-0 bg-gradient-to-r from-[#080a0f] via-transparent to-transparent"></div>
+                 {/* Vignette Overlay */}
+                 <div className="absolute inset-0 bg-gradient-to-r from-[#0c0f16]/90 via-[#0c0f16]/40 to-transparent"></div>
              </div>
 
-             <div className="relative z-10 w-full flex flex-col md:flex-row justify-between items-end gap-6">
-                 <div className="flex items-end gap-5">
+             {/* Content Layer - Mimicking In-Game Profile */}
+             <div className="relative p-6 md:p-10 flex items-center min-h-[280px]">
+                 <div className="flex flex-col md:flex-row items-center md:items-start gap-8 w-full max-w-4xl">
+                      
+                      {/* Avatar Circle */}
                       <div className="relative shrink-0">
-                           {/* Updated Profile Background to Sky Blue -> Indigo */}
-                           <div className="w-20 h-20 md:w-24 md:h-24 rounded-full p-0.5 bg-gradient-to-br from-sky-400 to-indigo-500 shadow-[0_0_20px_rgba(56,189,248,0.5)]">
-                               <div className="w-full h-full rounded-full border-4 border-[#080a0f] bg-[#1c212e] overflow-hidden">
-                                   <img 
-                                      src={data.profileIcon || "https://github.com/shadcn.png"} 
-                                      className="w-full h-full object-cover" 
-                                      alt="Traveler"
-                                      referrerPolicy="no-referrer"
-                                   />
-                               </div>
+                           <div className="w-24 h-24 md:w-32 md:h-32 rounded-full border-[3px] border-[#ffe175] bg-[#1c212e] overflow-hidden shadow-[0_0_30px_rgba(0,0,0,0.5)] z-10 relative">
+                               <img 
+                                  src={data.profileIcon || "https://enka.network/ui/UI_AvatarIcon_PlayerBoy.png"} 
+                                  className="w-full h-full object-cover" 
+                                  alt="Traveler"
+                                  referrerPolicy="no-referrer"
+                               />
                            </div>
-                           <div className="absolute -bottom-2 -right-1 bg-[#080a0f] text-[#ffe175] text-[10px] font-bold px-2 py-0.5 rounded-md border border-[#ffe175]/30 shadow-lg">
+                           {/* Level Badge */}
+                           <div className="absolute -bottom-2 md:bottom-0 left-1/2 -translate-x-1/2 bg-[#ffe175] text-[#0c0f16] text-xs font-black px-3 py-1 rounded-full border-2 border-[#1c212e] shadow-md z-20 whitespace-nowrap">
                                AR {data.level}
                            </div>
                       </div>
 
-                      <div className="mb-1">
-                           <h1 className="text-3xl md:text-4xl font-serif font-black text-white tracking-wide drop-shadow-lg leading-none mb-1.5">
+                      {/* Info Block */}
+                      <div className="flex-1 text-center md:text-left space-y-2 pt-2">
+                           <h1 className="text-3xl md:text-5xl font-serif font-black text-white tracking-wide drop-shadow-lg leading-tight break-words">
                                {data.nickname}
                            </h1>
-                           <div className="flex items-center gap-3 text-slate-300 text-xs font-bold">
-                               <span className="flex items-center gap-1.5 px-2 py-0.5 rounded bg-white/10 border border-white/10 backdrop-blur-sm">
-                                   <Calendar size={12} className="text-[#ffe175]" /> {activeDays} Days Active
-                               </span>
-                               <span className="uppercase tracking-widest text-[9px] opacity-70 border-l border-white/20 pl-3">
-                                   {data.server}
-                               </span>
-                           </div>
-                      </div>
-                 </div>
-
-                 {/* Paimon Insight Bubble - Smaller & Sleeker */}
-                 <div className="hidden lg:block relative max-w-xs mb-2 animate-float">
-                      <div className="glass-panel rounded-xl rounded-bl-none p-3 border border-[#ffe175]/20 bg-[#131720]/80">
-                           <p className="text-xs text-slate-200 leading-relaxed italic">
-                               "Traveler! Paimon noticed you've been working hard. Should we check on your <strong className="text-[#ffe175]">Abyss</strong> progress?"
+                           
+                           {/* Pseudo-Signature */}
+                           <p className="text-slate-300 italic text-sm md:text-base opacity-80 line-clamp-2 md:line-clamp-1 max-w-lg mx-auto md:mx-0">
+                               "Ad astra abyssosque! Exploring Teyvat one day at a time."
                            </p>
+
+                           {/* Tags Row */}
+                           <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 mt-3">
+                               <div className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-black/40 backdrop-blur-sm border border-white/5 text-xs font-bold text-slate-200">
+                                   <Calendar size={12} className="text-[#ffe175]" /> 
+                                   <span>Active {activeDays} Days</span>
+                               </div>
+                               <div className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-black/40 backdrop-blur-sm border border-white/5 text-xs font-bold text-slate-200 uppercase">
+                                   <Map size={12} className="text-emerald-400" />
+                                   <span>{data.server}</span>
+                               </div>
+                               {/* UID */}
+                               <div className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-black/40 backdrop-blur-sm border border-white/5 text-xs font-mono text-slate-400 group/uid cursor-pointer hover:bg-black/60 transition-colors" title="Copy UID">
+                                   <span>UID: {data.uid}</span>
+                                   <Copy size={10} className="opacity-0 group-hover/uid:opacity-100 transition-opacity" />
+                               </div>
+                           </div>
                       </div>
                  </div>
              </div>
@@ -160,33 +166,33 @@ const Dashboard: React.FC<DashboardProps> = ({ data }) => {
 
         {/* --- ZONE 2: PERFORMANCE OVERVIEW --- */}
         <div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                  <StatNode 
-                     label="Spiral Abyss" 
+                     label="Abyss" 
                      value={abyssFloor} 
                      icon={<Swords size={18} />} 
-                     subtext={`${data.abyss.stars} Stars collected`}
+                     subtext={`${data.abyss.stars} Stars`}
                      color="indigo"
                  />
                  <StatNode 
-                     label="Characters" 
+                     label="Chars" 
                      value={charCount} 
                      icon={<User size={18} />} 
-                     subtext="Total Characters"
+                     subtext="Collected"
                      color="orange"
                  />
                  <StatNode 
-                     label="World Explored" 
+                     label="World" 
                      value={`${avgExploration}%`} 
                      icon={<Map size={18} />} 
-                     subtext="Average Completion"
+                     subtext="Avg Complete"
                      color="emerald"
                  />
                  <StatNode 
-                     label="Achievements" 
+                     label="Trophies" 
                      value={achievements} 
                      icon={<Trophy size={18} />} 
-                     subtext="Total Unlocked"
+                     subtext="Unlocked"
                      color="amber"
                  />
             </div>
@@ -237,8 +243,8 @@ const Dashboard: React.FC<DashboardProps> = ({ data }) => {
                 </div>
             </div>
 
-            {/* Side Panel: Radar */}
-            <div className="hidden lg:block">
+            {/* Side Panel: Radar - Unhidden on mobile, stacked below */}
+            <div>
                  <h2 className="text-lg font-serif font-bold text-white mb-4 flex items-center gap-2">
                     <Compass size={18} className="text-[#ffe175]" />
                     Current Focus

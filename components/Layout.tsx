@@ -144,9 +144,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           {/* User Footer */}
           <div className="p-4 border-t border-white/10 shrink-0 w-full overflow-hidden bg-[#080a0f]">
                <div className="flex items-center gap-4 overflow-hidden h-10">
-                    <div className="w-10 h-10 rounded-full border border-white/20 shrink-0 bg-[#131720] shadow-lg relative z-10">
+                    <div className="w-10 h-10 rounded-full border border-white/20 shrink-0 bg-[#131720] shadow-lg relative z-10 overflow-hidden">
                         <img 
-                            src={user?.profileIcon || 'https://github.com/shadcn.png'} 
+                            src={user?.profileIcon || 'https://enka.network/ui/UI_AvatarIcon_PlayerBoy.png'} 
                             alt="User" 
                             className="w-full h-full rounded-full object-cover" 
                             referrerPolicy="no-referrer"
