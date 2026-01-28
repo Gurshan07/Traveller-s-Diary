@@ -26,14 +26,14 @@ const QuickChip: React.FC<{ label: string; icon: React.ReactNode; onClick: () =>
 const FormattedText: React.FC<{ text: string }> = ({ text }) => {
     const parts = text.split(/(\*\*.*?\*\*)/g);
     return (
-        <span className="text-sm leading-relaxed text-slate-100">
+        <div className="text-sm leading-relaxed text-slate-100 whitespace-pre-wrap break-words">
             {parts.map((part, i) => {
                 if (part.startsWith('**') && part.endsWith('**')) {
-                    return <span key={i} className="font-bold text-[#ffe175] drop-shadow-sm">{part.slice(2, -2)}</span>;
+                    return <strong key={i} className="font-bold text-[#ffe175] drop-shadow-sm">{part.slice(2, -2)}</strong>;
                 }
-                return part;
+                return <span key={i}>{part}</span>;
             })}
-        </span>
+        </div>
     );
 };
 
@@ -225,7 +225,8 @@ const PaimonSidekick: React.FC<PaimonSidekickProps> = ({ userData, context }) =>
             {isOpen && (
                 <div 
                     style={windowStyle}
-                    className="w-full sm:w-[340px] flex flex-col bg-[#0c0f16]/95 backdrop-blur-2xl border border-[#ffe175]/20 rounded-3xl shadow-[0_20px_60px_rgba(0,0,0,0.9)] overflow-hidden animate-fade-in ring-1 ring-[#ffe175]/10"
+                    // Increased desktop width to 400px for better text layout
+                    className="w-full sm:w-[400px] flex flex-col bg-[#0c0f16]/95 backdrop-blur-2xl border border-[#ffe175]/20 rounded-3xl shadow-[0_20px_60px_rgba(0,0,0,0.9)] overflow-hidden animate-fade-in ring-1 ring-[#ffe175]/10"
                 >
                     {/* Header */}
                     <div className="h-14 bg-gradient-to-r from-[#1c212e] to-[#0c0f16] border-b border-white/10 flex items-center justify-between px-4 select-none">
@@ -278,7 +279,7 @@ const PaimonSidekick: React.FC<PaimonSidekickProps> = ({ userData, context }) =>
                                 {msg.role !== 'user' && (
                                     <Bot size={24} className="text-[#ffe175] mt-1 shrink-0 drop-shadow-[0_0_10px_rgba(255,225,117,0.5)]" />
                                 )}
-                                <div className={`max-w-[85%] rounded-2xl p-3.5 text-sm shadow-md ${
+                                <div className={`max-w-[90%] rounded-2xl p-3.5 text-sm shadow-md ${
                                     msg.role === 'user' 
                                     ? 'bg-gradient-to-br from-[#ffe175] to-[#c2aa7c] text-[#0c0f16] font-bold rounded-tr-none' 
                                     : 'bg-[#1e2330] border border-white/10 text-slate-200 rounded-tl-none'

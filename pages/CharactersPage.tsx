@@ -76,7 +76,10 @@ const CharacterDetailModal: React.FC<{
                     </div>
 
                     {/* Navigation Tabs (Vertical/Horizontal hybrid) */}
-                    <div className="flex px-6 md:px-8 border-b border-white/5 overflow-x-auto no-scrollbar gap-6 shrink-0">
+                    <div 
+                        className="flex px-6 md:px-8 border-b border-white/5 overflow-x-auto gap-6 shrink-0 [&::-webkit-scrollbar]:hidden" 
+                        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+                    >
                         {['Attributes', 'Weapon', 'Artifacts', 'Constellation'].map((tab) => (
                             <button
                                 key={tab}
