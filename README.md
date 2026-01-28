@@ -109,13 +109,3 @@ Paimon isn't just decoration — she's your **AI guide**.
 - Usage is at **your own discretion and risk**
 
 > This tool is designed for **personal analytics and educational purposes only**.
-
----
-
-## 🚀 Getting Started
-
-### 1️⃣ Clone the Repository
-```bash
-git clone https://github.com/your-username/paimon-insights.git
-cd paimon-insights
-```
