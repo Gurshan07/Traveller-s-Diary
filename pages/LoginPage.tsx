@@ -114,7 +114,7 @@ const LoginPage: React.FC = () => {
                   <ol className="text-xs text-slate-500 dark:text-slate-400 space-y-2 list-decimal list-inside bg-slate-50 dark:bg-slate-900/50 p-4 rounded-xl">
                      <li>Log in to <a href="https://www.hoyolab.com" target="_blank" rel="noopener noreferrer" className="text-[#4e6c8e] hover:underline inline-flex items-center gap-0.5">HoYoLab <ExternalLink size={10} /></a></li>
                      <li>Open Developer Tools (F12) &gt; Console</li>
-                     <li>Type <code className="bg-slate-200 dark:bg-slate-800 px-1 py-0.5 rounded text-slate-700 dark:text-slate-300">document.cookie</code></li>
+                     <li>Open <span className="font-semibold text-slate-700 dark:text-slate-300">Application</span> &gt; Storage &gt; Cookies</li>
                      <li>Copy <code className="font-mono text-[#4e6c8e]">ltuid_v2</code> and <code className="font-mono text-[#4e6c8e]">ltoken_v2</code></li>
                   </ol>
               </div>
