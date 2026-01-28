@@ -3,7 +3,7 @@
 
 **Traveller's Diary** is a modern, immersive web application that serves as a personal dashboard for Genshin Impact players. It visualizes your in-game data, tracks your progress, and provides AI-powered insights using a beautiful, game-inspired UI.
 
-![Project Preview](https://i.imgur.com/your-preview-image.png) *<!-- Replace with actual screenshot -->*
+![Project Preview](https://i.imgur.com/your-preview-image.png) 
 
 ## 🌟 Key Features
 
